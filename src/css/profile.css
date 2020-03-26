@@ -1,0 +1,27 @@
+/* .navbar-inner.navbar-inner-spacing {
+  justify-content: space-between;
+} */
+.user-profile {
+  color: gray;
+  margin-right: var(--f7-navbar-title-margin-left);
+  margin-left: auto;
+  display: flex;
+}
+
+.user-profile .text-block {
+  text-align: right;
+  margin-right: 10px;
+}
+
+.user-profile .item-title {
+  font-size: small;
+}
+
+.user-profile .item-subtitle {
+  font-size: x-small;
+}
+
+.user-profile img {
+  height: 40px;
+  border-radius: 50%;
+}

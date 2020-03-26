@@ -1,0 +1,21 @@
+.state-group .P,
+.state-group .A,
+.state-group .L {
+  padding-left: 15px;
+  padding-right: 15px;
+  overflow: initial;
+}
+
+.state-group .button-active.P {
+  background-color: green;
+}
+.state-group .button-active.L {
+  background-color: orange;
+}
+.state-group .button-active.A {
+  background-color: red;
+}
+
+.header {
+  background-color: #eee;
+}
