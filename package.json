@@ -1,8 +1,8 @@
 {
-  "name": "simple",
+  "name": "register",
   "private": true,
   "version": "1.0.0",
-  "description": "simple",
+  "description": "class register",
   "repository": "",
   "license": "UNLICENSED",
   "framework7": {
@@ -10,7 +10,7 @@
     "type": [
       "web"
     ],
-    "name": "simple",
+    "name": "register",
     "framework": "react",
     "template": "single-view",
     "cssPreProcessor": false,
