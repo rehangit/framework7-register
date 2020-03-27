@@ -4,16 +4,6 @@
   top: initial;
 }
 
-.class-button {
-  text-align: center;
-  display: inline-block;
-  width: 47.5%;
-  border: 1px solid gray;
-  margin: 5px;
-  height: 100px;
-  line-height: 100px;
-}
-
 .weekday-madrasah-on .calendar-day-number {
   background-color: gold;
 }

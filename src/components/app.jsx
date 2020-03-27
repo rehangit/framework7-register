@@ -36,8 +36,7 @@ export default class extends React.Component {
     this.state = {
       // Framework7 Parameters
       f7params: {
-        name: "Register", // App name
-        theme: "auto", // Automatic theme detection
+        name: "Register App", // App name
       },
 
       attendance: [],
@@ -53,7 +52,6 @@ export default class extends React.Component {
       section,
       ...dateRecs,
     }));
-    console.log({ attendance });
     this.setState({ attendance });
   }
 
@@ -115,7 +113,13 @@ export default class extends React.Component {
       <App>
         {this.state.signedIn ? (
           <View main>
-            <Navbar title={this.state.f7params.name} sliding innerClass="navbar-inner-spacing">
+            <Navbar
+              title={this.state.f7params.name}
+              style={{
+                left: 0,
+              }}
+              innerClass="navbar-inner-spacing"
+            >
               <SignInProfile
                 signedIn={this.state.signedIn}
                 user={this.state.user}

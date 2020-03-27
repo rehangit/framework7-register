@@ -1,10 +1,10 @@
-/* .navbar-inner.navbar-inner-spacing {
+.navbar-inner.navbar-inner-spacing {
   justify-content: space-between;
-} */
+}
+
 .user-profile {
   color: gray;
   margin-right: var(--f7-navbar-title-margin-left);
-  margin-left: auto;
   display: flex;
 }
 

@@ -1,3 +1,5 @@
+import { SPREADSHEET_ID } from "../config/vars.json";
+
 const toJson = table => {
   if (table.length < 1) return {};
 
@@ -15,7 +17,7 @@ const toJson = table => {
 export default sheetName =>
   gapi.client.sheets.spreadsheets.values
     .get({
-      spreadsheetId: "1Wf8_SpJefbE8vAmYSargCGGY7sfYkxeeQfw8dvFT62Q",
+      spreadsheetId: SPREADSHEET_ID,
       range: sheetName,
       valueRenderOption: "UNFORMATTED_VALUE",
     })

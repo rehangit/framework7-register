@@ -43,34 +43,32 @@ const dateToSerial = date => (date - new Date("1900-01-01")) / (1000 * 3600 * 24
 export default ({ data }) => {
   const [selectedSection, setSelectedSection] = React.useState("B3");
   const [date, setDate] = React.useState(new Date());
+  const [students, setStudents] = React.useState([]);
 
-  const sdata = React.use(() => {
+  React.useEffect(() => {
     const dateSerial = Math.floor(dateToSerial(date));
-    return data.map(d => {
+    const sdata = data.map(d => {
       const { name, section } = d;
       const attendance = d[dateSerial];
       return { name, section, attendance };
     });
-  }, [date]);
-  console.log({ sdata });
+    setStudents(sdata);
+  }, [data, date]);
 
-  const [students, setStudents] = React.useState(sdata);
-
-  console.log({ students });
   const onChange = React.useCallback(
     (value, name) => {
-      console.log("onChange", value, name);
+      console.log("onChange", value, name, selectedSection);
       if (name) {
         const index = students.findIndex(s => s.name === name);
         students[index].attendance = value;
       } else {
         for (let i = 0; i < students.length; i++) {
-          students[i].attendance = value;
+          if (students[i].section === selectedSection) students[i].attendance = value;
         }
       }
       setStudents(students.slice());
     },
-    [students]
+    [students, selectedSection]
   );
 
   return (
@@ -83,7 +81,16 @@ export default ({ data }) => {
           calendarParams={calendarParams}
           outline
         />
-        <ListInput type="select" label="Class" defaultValue={selectedSection} outline>
+        <ListInput
+          type="select"
+          label="Class"
+          defaultValue={selectedSection}
+          outline
+          onChange={e => {
+            console.log(e);
+            setSelectedSection(e.target.value);
+          }}
+        >
           {["B1", "B2", "B3", "B4", "G1", "G2", "G3", "G4"].map(name => (
             <option value={name} key={name}>
               {name}
@@ -95,16 +102,18 @@ export default ({ data }) => {
         <ListItem title="Student" className="header">
           <StateGroupButtons labels="PLA" slot="after" header={true} onChange={onChange} />
         </ListItem>
-        {students.map(({ name, attendance }) => (
-          <ListItem title={name} key={name}>
-            <Icon slot="media" f7="person"></Icon>
-            <StateGroupButtons
-              labels="PLA"
-              value={attendance}
-              onChange={value => onChange(value, name)}
-            />
-          </ListItem>
-        ))}
+        {students
+          .filter(s => s.section === selectedSection)
+          .map(({ name, attendance, section }) => (
+            <ListItem title={name} key={name}>
+              <Icon slot="media" f7="person"></Icon>
+              <StateGroupButtons
+                labels="PLA"
+                value={attendance}
+                onChange={value => onChange(value, name)}
+              />
+            </ListItem>
+          ))}
       </List>
       <Toolbar tabber labels position="bottom">
         <Link>Attendance</Link>
