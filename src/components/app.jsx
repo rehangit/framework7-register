@@ -4,28 +4,10 @@ import "framework7-icons";
 import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES } from "../config/vars.json";
 
 import MainPage from "../pages/main";
-import LoginScreen from "../pages/login";
+import MyLoginScreen from "../pages/login";
 import getSheetData from "../data/googleApi";
 
-import {
-  App,
-  View,
-  Page,
-  Navbar,
-  Block,
-  BlockTitle,
-  ListItem,
-  List,
-  ListView,
-  ListInput,
-  Icon,
-  Button,
-  Input,
-  Row,
-  Col,
-  Toolbar,
-  Link,
-} from "framework7-react";
+import { App, View } from "framework7-react";
 
 import { SignInProfile } from "./profile";
 
@@ -36,36 +18,46 @@ export default class extends React.Component {
     this.state = {
       // Framework7 Parameters
       f7params: {
-        name: "Register App", // App name
+        name: "Register", // App name
+        id: "com.rehan.register",
       },
 
       attendance: [],
       user: {},
       signedIn: false,
+      showLogin: true,
     };
   }
 
   async fetchData() {
-    const data = await getSheetData("Attendance");
-    const attendance = data.map(({ name, section, ...dateRecs }) => ({
-      name,
-      section,
-      ...dateRecs,
-    }));
-    this.setState({ attendance });
+    try {
+      const data = await getSheetData("Attendance");
+      const attendance = data.map(({ name, section, ...dateRecs }) => ({
+        name,
+        section,
+        ...dateRecs,
+      }));
+      this.setState({ attendance });
+    } catch (err) {
+      console.log([err]);
+      this.setState({ attendance: [], signedIn: false, showLogin: true });
+    }
   }
 
   async updateUser() {
     try {
       const signedIn = await gapi.auth2.getAuthInstance().isSignedIn.get();
       this.setState({ signedIn });
-      console.log({ signedIn });
       if (signedIn) {
         const current = await gapi.auth2.getAuthInstance().currentUser.get();
         const profile = await current.getBasicProfile();
         const [name, email, image] = [profile.getName(), profile.getEmail(), profile.getImageUrl()];
         const user = { name, email, image };
         this.setState({ user });
+        this.setState({ showLogin: false });
+        this.fetchData();
+      } else {
+        this.setState({ user: {} });
       }
     } catch (err) {
       console.log("Update User error:", { err });
@@ -83,7 +75,7 @@ export default class extends React.Component {
           scope: SCOPES,
         })
         .then(() => {
-          Promise.all([this.updateUser(), this.fetchData()]);
+          this.updateUser();
         })
         .catch(console.log);
   }
@@ -93,9 +85,13 @@ export default class extends React.Component {
     this.setState({ signedIn: await gapi.auth2.getAuthInstance().isSignedIn.get() });
   }
 
+  showLogin(show) {
+    this.setState({ showLogin: show });
+  }
+
   async onSignIn() {
     await gapi.auth2.getAuthInstance().signIn({ prompt: "select_account" });
-    return this.updateUser();
+    this.updateUser();
   }
 
   componentDidMount() {
@@ -110,27 +106,15 @@ export default class extends React.Component {
 
   render() {
     return (
-      <App>
-        {this.state.signedIn ? (
-          <View main>
-            <Navbar
-              title={this.state.f7params.name}
-              style={{
-                left: 0,
-              }}
-              innerClass="navbar-inner-spacing"
-            >
-              <SignInProfile
-                signedIn={this.state.signedIn}
-                user={this.state.user}
-                onClick={() => this.signOut()}
-              />
-            </Navbar>
-            <MainPage data={this.state.attendance} />
-          </View>
-        ) : (
-          <LoginScreen name={this.state.f7params.name} onSignIn={() => this.onSignIn()} />
-        )}
+      <App params={this.state.f7params}>
+        <View>
+          <MainPage
+            data={this.state.attendance}
+            user={this.state.user}
+            onProfile={() => this.showLogin(true)}
+          />
+        </View>
+        <MyLoginScreen parent={this} show={this.state.showLogin} />
       </App>
     );
   }

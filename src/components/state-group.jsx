@@ -3,10 +3,10 @@ import { Segmented, Button } from "framework7-react";
 
 import "../css/state-group.css";
 
-export default ({ labels, onChange, value, slot, header }) => {
-  // const [active, setActive] = React.useState(value);
+export default ({ labels, onChange, value, slot, header, isDirty }) => {
+  const classes = ["state-group", isDirty ? "dirty" : ""].join(" ");
   return (
-    <Segmented raised className="state-group" slot={slot}>
+    <Segmented raised className={classes} slot={slot}>
       {labels.split("").map((label, i) => (
         <Button
           key={i}

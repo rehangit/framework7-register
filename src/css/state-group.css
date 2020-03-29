@@ -19,3 +19,7 @@
 .header {
   background-color: #eee;
 }
+
+.dirty {
+  box-shadow: red 0px 1px 2px;
+}

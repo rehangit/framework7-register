@@ -1,0 +1,8 @@
+.button-bar .toolbar-inner {
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+.button-bar .button {
+  min-width: 30%;
+}

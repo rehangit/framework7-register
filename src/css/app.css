@@ -1,5 +1,9 @@
 /* Your app custom styles here */
 
+.md .navbar-inner-spacing {
+  justify-content: space-between;
+}
+
 .navbar ~ .page:not(.no-navbar) .toolbar-top {
   top: initial;
 }

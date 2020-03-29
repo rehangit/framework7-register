@@ -1,20 +1,19 @@
-.navbar-inner.navbar-inner-spacing {
-  justify-content: space-between;
-}
-
 .user-profile {
   color: gray;
-  margin-right: var(--f7-navbar-title-margin-left);
   display: flex;
+  justify-content: flex-end;
+  overflow: hidden;
+  margin: 0 var(--f7-navbar-title-margin-left);
 }
 
 .user-profile .text-block {
   text-align: right;
-  margin-right: 10px;
+  margin-right: calc(var(--f7-navbar-title-margin-left) / 2);
 }
 
 .user-profile .item-title {
   font-size: small;
+  text-overflow: ellipsis;
 }
 
 .user-profile .item-subtitle {
