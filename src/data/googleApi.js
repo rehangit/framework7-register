@@ -14,7 +14,68 @@ const toJson = table => {
   }, []);
 };
 
-export default sheetName =>
+/*
+    return gapi.client.sheets.spreadsheets.values.batchUpdate({
+      "spreadsheetId": "10KXAXp2e2UkEbKhT1R0ytxC_Vpvs0DVjxXBiaoIs8WY",
+      "resource": {
+        "data": [
+          {
+            "range": "Attendance!CP29",
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "P"
+              ]
+            ]
+          }
+        ],
+        "valueInputOption": "USER_ENTERED"
+      }
+    })
+
+*/
+
+const setMultiple = rangesAndValues => {
+  const data = rangesAndValues.map(([range, value]) => ({
+    range,
+    values: [[value]],
+    majorDimension: "ROWS",
+  }));
+  console.log("setMultiple", { data });
+  console.log("setMultiple params", {
+    spreadsheetId: SPREADSHEET_ID,
+    resource: { data, valueInputOption: "USER_ENTERED" },
+  });
+  return gapi.client.sheets.spreadsheets.values
+    .batchUpdate({
+      spreadsheetId: SPREADSHEET_ID,
+      resource: { data, valueInputOption: "USER_ENTERED" },
+    })
+    .then(response => {
+      var result = response.result;
+      console.log(`${result.totalUpdatedCells} cells updated.`, result);
+    });
+};
+
+const getMultipleRanges = async ranges => {
+  console.log(">getMultipleRanges", ranges);
+  try {
+    return gapi.client.sheets.spreadsheets.values
+      .batchGet({ spreadsheetId: SPREADSHEET_ID, ranges, valueRenderOption: "UNFORMATTED_VALUE" })
+      .then(response => {
+        var result = response.result;
+        console.log(`${result.valueRanges.length} ranges retrieved: `, { ranges, result });
+        const values = result.valueRanges.map(({ values }) => values);
+        console.log({ values });
+        return values;
+      });
+  } catch (err) {
+    console.log({ err });
+    return [];
+  }
+};
+
+const getSheet = sheetName =>
   gapi.client.sheets.spreadsheets.values
     .get({
       spreadsheetId: SPREADSHEET_ID,
@@ -29,3 +90,5 @@ export default sheetName =>
       }
       return [];
     });
+
+export { getSheet, getMultipleRanges, setMultiple };

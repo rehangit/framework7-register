@@ -37,47 +37,69 @@ const calendarParams = {
   ],
 };
 
-const serialToDate = serial => new Date(Math.floor(serial - 25569) * 86400 * 1000);
-const dateToSerial = date => (date - new Date("1900-01-01")) / (1000 * 3600 * 24);
-
-export default ({ data, user, onProfile }) => {
-  const [selectedSection, setSelectedSection] = React.useState("B3");
+export default ({ getData, user, onProfile, saveData }) => {
   const [date, setDate] = React.useState(new Date());
   const [students, setStudents] = React.useState([]);
   const [modified, setModified] = React.useState(false);
-  const [scoreType, setScoreType] = React.useState("attendance");
+  const [sections, setSections] = React.useState([]);
+  const [selectedSection, setSelectedSection] = React.useState();
+  const [scoreType, setScoreType] = React.useState("Attendance");
 
   React.useEffect(() => {
     if (modified) return;
-    const dateSerial = Math.floor(dateToSerial(date));
-    const sdata = data.map(d => {
-      const { name, section } = d;
-      const score = d[dateSerial];
-      const origScore = d[dateSerial];
-      return { name, section, score, origScore };
+    getData({ scoreType, date }).then(data => {
+      console.log({ data });
+      const sdata = data.map(d => ({ ...d, orig: d.value }));
+      setStudents(sdata);
+      const secs = Array.from(
+        sdata.reduce((acc, { section }) => {
+          acc.add(section);
+          return acc;
+        }, new Set())
+      ).filter(Boolean);
+      setSections(secs);
+      setSelectedSection(selectedSection || secs[0]);
+      console.log({ sdata, secs });
     });
-    setStudents(sdata);
-    setModified(false);
-  }, [data, date, modified]);
+  }, [date, modified, user]);
 
   const onChange = React.useCallback(
     (value, name) => {
       console.log("onChange", value, name, selectedSection);
       if (name) {
         const index = students.findIndex(s => s.name === name);
-        students[index].score = value;
+        students[index].value = value;
       } else {
-        for (let i = 0; i < students.length; i++) {
-          if (students[i].section === selectedSection) students[i].score = value;
-        }
+        students.forEach((s, i) => {
+          if (s.section === selectedSection) {
+            students[i].value = value;
+          }
+        });
       }
       setStudents(students.slice());
-      setModified(true);
+
+      const mods = students.reduce((acc, { value, orig }) => acc || value !== orig, false);
+      setModified(mods);
+      console.log("onChange", { mods, students });
     },
     [students, selectedSection]
   );
 
-  const name = f7 && f7.params.name;
+  const onSave = React.useCallback(() => {
+    if (!modified) return;
+    const values = students.reduce((acc, { id, value, orig }) => {
+      if (value != orig) {
+        acc.push({ id, value });
+      }
+      return acc;
+    }, []);
+    console.log("saving data:", { scoreType, date, values });
+    saveData({ scoreType, date, values }).then(() => {
+      setModified(false);
+    });
+  }, [date, students, modified]);
+
+  const name = (f7 && f7.params.name) || "";
 
   return (
     <Page>
@@ -98,6 +120,7 @@ export default ({ data, user, onProfile }) => {
           calendarParams={calendarParams}
           outline
           disabled={modified}
+          onCalendarChange={([newDate]) => setDate(newDate)}
         />
         <ListInput
           type="select"
@@ -107,7 +130,7 @@ export default ({ data, user, onProfile }) => {
           onChange={e => setSelectedSection(e.target.value)}
           disabled={modified}
         >
-          {["B1", "B2", "B3", "B4", "G1", "G2", "G3", "G4"].map(name => (
+          {sections.map(name => (
             <option value={name} key={name}>
               {name}
             </option>
@@ -120,28 +143,30 @@ export default ({ data, user, onProfile }) => {
         </ListItem>
         {students
           .filter(s => s.section === selectedSection)
-          .map(({ name, score, section, origScore }) => (
+          .map(({ name, value, section, orig }) => (
             <ListItem title={name} key={name}>
               <Icon slot="media" f7="person"></Icon>
               <StateGroupButtons
                 labels="PLA"
-                value={score}
-                isDirty={origScore !== score}
+                value={value}
+                isDirty={orig !== value}
                 onChange={value => onChange(value, name)}
               />
             </ListItem>
           ))}
       </List>
-      <Toolbar hidden={modified} labels tabber bottom>
-        <Link>Attendance</Link>
-        <Link>Behaviour</Link>
-        <Link>Learning</Link>
+      <Toolbar hidden={modified} tabbar labels bottom>
+        <Link tabLink="#tab-1" tabLinkActive>
+          Attendance
+        </Link>
+        <Link tabLink="#tab-2">Behaviour</Link>
+        <Link tabLink="#tab-3">Learning</Link>
       </Toolbar>
       <Toolbar className="button-bar" hidden={!modified} bottom>
         <Button raised fill color="red" onClick={() => setModified(false)}>
           Cancel
         </Button>
-        <Button raised fill color="green">
+        <Button raised fill color="green" onClick={onSave}>
           Save
         </Button>
       </Toolbar>
