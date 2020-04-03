@@ -37,8 +37,8 @@
 
     <!-- built script files will be auto injected -->
     <script>
-      function onGapi() {
-        this.onload = function() {};
+      function onGapi(self) {
+        self.onload = function() {};
         console.log("GAPI onload called");
         gapi.load("client:auth2", () => {
           console.log("GAPI dispatching gapi event");
@@ -54,7 +54,7 @@
       async
       defer
       src="https://apis.google.com/js/api.js"
-      onload="onGapi()"
+      onload="onGapi(this)"
       onreadystatechange="if (this.readyState === 'complete') this.onload()"
     ></script>
   </body>

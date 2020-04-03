@@ -1,4 +1,4 @@
-import { SPREADSHEET_ID } from "../config/vars.json";
+import env from "../config/env.json";
 
 const toJson = table => {
   if (table.length < 1) return {};
@@ -14,26 +14,9 @@ const toJson = table => {
   }, []);
 };
 
-/*
-    return gapi.client.sheets.spreadsheets.values.batchUpdate({
-      "spreadsheetId": "10KXAXp2e2UkEbKhT1R0ytxC_Vpvs0DVjxXBiaoIs8WY",
-      "resource": {
-        "data": [
-          {
-            "range": "Attendance!CP29",
-            "majorDimension": "ROWS",
-            "values": [
-              [
-                "P"
-              ]
-            ]
-          }
-        ],
-        "valueInputOption": "USER_ENTERED"
-      }
-    })
-
-*/
+const SPREADSHEET_ID = window.location.origin.includes(env.ORIGIN)
+  ? env.SPREADSHEET_ID_PROD
+  : env.SPREADSHEET_ID_DEV;
 
 const setMultiple = rangesAndValues => {
   const data = rangesAndValues.map(([range, value]) => ({

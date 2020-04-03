@@ -1,7 +1,7 @@
 import React from "react";
 import "framework7-icons";
 
-import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES } from "../config/vars.json";
+import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES } from "../config/env.json";
 
 import MainPage from "../pages/main";
 import MyLoginScreen from "../pages/login";
@@ -31,62 +31,52 @@ export default class extends React.Component {
         id: "com.rehan.register",
       },
 
-      data: [],
       user: {},
       signedIn: false,
       showLogin: true,
     };
   }
 
-  async fetchData() {
-    console.log(">fetchData");
-    try {
-      const data = await getSheet("Attendance");
-      this.setState({ data });
-    } catch (err) {
-      console.log([err]);
-      this.setState({ data: [], signedIn: false, showLogin: true });
-    }
-  }
-
-  async getData({ scoreType, date }) {
+  async getHeaders(scoreType) {
     if (!this.state.signedIn) return [];
-    const serial = dateToSerial(date);
     const result = await getMultipleRanges([`${scoreType}!A2:C`, `${scoreType}!1:1`]);
     if (!result || !result.length) return [];
-    const [studentInfo, [dates]] = result;
-    const dateIndex = 3 + dates.findIndex(d => d === serial);
-    console.log("getData", { dates, serial, dateIndex });
-    const col = indexToLetter(dateIndex);
-    console.log("getData", { col });
-    const [colData] = await getMultipleRanges([`${scoreType}!${col}2:${col}`]);
-    console.log("getData", { colData });
-    console.log("getData", { studentInfo });
-    const data = studentInfo.map(([id, name, section], i) => ({
-      id,
-      name,
-      section,
-      value: colData && colData[i] && colData[i][0],
+    const [namesRows, [dates]] = result;
+    const names = namesRows.map(([id, name, section]) => ({ id, name, section }));
+    console.log("getHeaders", { names, dates });
+
+    return { names, dates };
+  }
+
+  async getData({ scoreType, indices }) {
+    if (!this.state.signedIn) return [];
+
+    const ranges = indices.map(([ri, ci]) => {
+      const col = indexToLetter(ci);
+      return `${scoreType}!${col}${2 + ri}`;
+    });
+
+    console.log("getData", { ranges });
+
+    const colData = await getMultipleRanges(ranges);
+    console.log("getData", { colData, indices });
+
+    const data = indices.map(([ri], i) => ({
+      index: ri,
+      value: colData && colData[i] && colData[i][0][0],
     }));
     console.log("getData", { data });
     return data;
   }
 
-  async saveData({ scoreType, date, values }) {
-    if (!date || !scoreType) return;
-    const serial = dateToSerial(date);
-    const result = await getMultipleRanges([`${scoreType}!A:A`, `${scoreType}!1:1`]);
-    if (!result || !result.length) return [];
-    const [ids, [dates]] = result;
-    const dateIndex = 3 + dates.findIndex(d => d === serial);
-    console.log("saveData", { ids, dates, serial, dateIndex });
-    const col = indexToLetter(dateIndex);
-    console.log("saveData", { col });
+  async saveData({ scoreType, values }) {
+    if (!scoreType) return;
 
     const rangesAndValues =
       (values &&
-        values.map(({ id, value }) => {
-          const row = 1 + ids.findIndex(([i]) => i === id);
+        values.map(({ ri, ci, value }) => {
+          const col = indexToLetter(ci);
+          const row = ri + 2;
           const range = `${scoreType}!${col}${row}`;
           return [range, value];
         })) ||
@@ -106,7 +96,6 @@ export default class extends React.Component {
         const user = { name, email, image };
         this.setState({ user });
         this.setState({ showLogin: false });
-        // this.fetchData();
       } else {
         this.setState({ user: {} });
       }
@@ -131,26 +120,51 @@ export default class extends React.Component {
         .catch(console.log);
   }
 
-  async signOut() {
-    await gapi.auth2.getAuthInstance().signOut();
-    this.setState({ signedIn: await gapi.auth2.getAuthInstance().isSignedIn.get() });
+  signOut(attempt = 0) {
+    console.log(">signOut", attempt);
+    gapi.auth2
+      .getAuthInstance()
+      .signOut()
+      .then(params => {
+        const signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+        console.log(">signOut > then", { signedIn, params });
+        if (signedIn && attempt < 3) {
+          setTimeout(() => this.signOut(++attempt), 1000);
+          return;
+        }
+        // gapi.auth2.getAuthInstance().disconnect();
+        const current = gapi.auth2.getAuthInstance().currentUser.get();
+        current.reloadAuthResponse();
+        this.setState({ signedIn: false });
+        setTimeout(() => window.location.reload(), 100);
+      });
   }
 
   showLogin(show) {
     this.setState({ showLogin: show });
   }
 
-  async onSignIn() {
-    await gapi.auth2.getAuthInstance().signIn({ prompt: "select_account" });
-    this.updateUser();
+  onSignIn() {
+    try {
+      gapi.auth2
+        .getAuthInstance()
+        .signIn({ prompt: "select_account" })
+        .then(() => {
+          this.updateUser();
+        });
+    } catch (err) {
+      console.log(">signIn", { err });
+      window.location.reload();
+    }
   }
 
   componentDidMount() {
     console.log("COMPONENTDIDMOUNT");
-    if (window.gapi) {
+    if (gapi && gapi.auth2) {
       console.log("GAPI - already available");
       this.onGapiAvailable();
     } else {
+      console.log("listening for 'gapi_available'");
       addEventListener("gapi_available", () => this.onGapiAvailable());
     }
   }
@@ -160,9 +174,10 @@ export default class extends React.Component {
       <App params={this.state.f7params}>
         <View>
           <MainPage
-            getData={(...args) => this.getData(...args)}
             user={this.state.user}
             onProfile={() => this.showLogin(true)}
+            getData={(...args) => this.getData(...args)}
+            getHeaders={(...args) => this.getHeaders(...args)}
             saveData={(...args) => this.saveData(...args)}
           />
         </View>

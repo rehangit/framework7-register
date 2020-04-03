@@ -14,6 +14,8 @@ import {
   Toolbar,
   Link,
   f7,
+  Block,
+  Preloader,
 } from "framework7-react";
 
 import { SignInProfile } from "../components/profile";
@@ -37,31 +39,79 @@ const calendarParams = {
   ],
 };
 
-export default ({ getData, user, onProfile, saveData }) => {
-  const [date, setDate] = React.useState(new Date());
-  const [students, setStudents] = React.useState([]);
-  const [modified, setModified] = React.useState(false);
+const dateToSerial = date => Math.floor((date - new Date("1900-01-01")) / (1000 * 3600 * 24));
+
+export default ({ getData, getHeaders, user, onProfile, saveData }) => {
+  const [names, setNames] = React.useState([]);
+  const [dates, setDates] = React.useState([]);
+
   const [sections, setSections] = React.useState([]);
-  const [selectedSection, setSelectedSection] = React.useState();
+  const [students, setStudents] = React.useState([]);
   const [scoreType, setScoreType] = React.useState("Attendance");
+  const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [selectedSection, setSelectedSection] = React.useState();
+
+  const [waiting, setWaiting] = React.useState(false);
+
+  const modified = React.useMemo(() => {
+    console.log("modified memo");
+    const mods = students.reduce((acc, { value, orig }) => acc || value !== orig, false);
+    console.log("onChange", { mods });
+    return mods;
+  }, [students]);
 
   React.useEffect(() => {
-    if (modified) return;
-    getData({ scoreType, date }).then(data => {
-      console.log({ data });
-      const sdata = data.map(d => ({ ...d, orig: d.value }));
-      setStudents(sdata);
-      const secs = Array.from(
-        sdata.reduce((acc, { section }) => {
-          acc.add(section);
-          return acc;
-        }, new Set())
-      ).filter(Boolean);
-      setSections(secs);
-      setSelectedSection(selectedSection || secs[0]);
-      console.log({ sdata, secs });
+    setWaiting(true);
+    getHeaders(scoreType).then(headers => {
+      console.log("React.useEffect[user]", headers);
+
+      setNames(headers.names);
+      setDates(headers.dates);
+
+      setWaiting(false);
     });
-  }, [date, modified, user]);
+  }, [user]);
+
+  React.useEffect(() => {
+    if (!names || !names.length) return;
+    const sectionsSet = names.reduce((acc, { section }) => {
+      acc.add(section);
+      return acc;
+    }, new Set());
+
+    const sections = Array.from(sectionsSet).filter(Boolean);
+    setSections(sections);
+    setSelectedSection(selectedSection || sections[0]);
+
+    console.log("React.useEffect[names]", { names, sections });
+  }, [names]);
+
+  React.useEffect(() => {
+    setWaiting(true);
+
+    const serial = dateToSerial(selectedDate);
+    const col = 3 + dates.findIndex(d => d === serial);
+    const indices = names.reduce((acc, { section }, row) => {
+      if (section === selectedSection) {
+        acc.push([row, col]);
+      }
+      return acc;
+    }, []);
+
+    getData({ scoreType, indices }).then(data => {
+      console.log("React.useEffect [selectedDate, selectedSection]", { data });
+      const sdata = data.map(({ index, value }) => ({
+        ...names[index],
+        index,
+        value,
+        orig: value,
+      }));
+      setStudents(sdata);
+
+      setWaiting(false);
+      console.log({ sdata });
+    });
+  }, [selectedDate, selectedSection]);
 
   const onChange = React.useCallback(
     (value, name) => {
@@ -77,27 +127,39 @@ export default ({ getData, user, onProfile, saveData }) => {
         });
       }
       setStudents(students.slice());
-
-      const mods = students.reduce((acc, { value, orig }) => acc || value !== orig, false);
-      setModified(mods);
-      console.log("onChange", { mods, students });
     },
     [students, selectedSection]
   );
 
   const onSave = React.useCallback(() => {
     if (!modified) return;
-    const values = students.reduce((acc, { id, value, orig }) => {
+    setWaiting(true);
+    const serial = dateToSerial(selectedDate);
+    const colIndex = 3 + dates.findIndex(d => d === serial);
+    const values = students.reduce((acc, { index, value, orig }) => {
       if (value != orig) {
-        acc.push({ id, value });
+        acc.push({ ri: index, ci: colIndex, value });
       }
       return acc;
     }, []);
-    console.log("saving data:", { scoreType, date, values });
-    saveData({ scoreType, date, values }).then(() => {
-      setModified(false);
+    console.log("saving data:", { scoreType, date: selectedDate, values });
+    saveData({ scoreType, values }).then(() => {
+      setStudents(
+        students.map((s, i) => {
+          s.orig = s.value;
+          return s;
+        })
+      );
+      setWaiting(false);
     });
-  }, [date, students, modified]);
+  }, [selectedDate, students, modified]);
+
+  const onCancel = React.useCallback(() => {
+    students.forEach((s, i) => {
+      students[i].value = s.orig;
+    });
+    setStudents(students.slice());
+  }, [students]);
 
   const name = (f7 && f7.params.name) || "";
 
@@ -116,11 +178,11 @@ export default ({ getData, user, onProfile, saveData }) => {
         <ListInput
           type="datepicker"
           label="Date"
-          value={[date]}
+          value={[selectedDate]}
           calendarParams={calendarParams}
           outline
           disabled={modified}
-          onCalendarChange={([newDate]) => setDate(newDate)}
+          onCalendarChange={([newDate]) => setSelectedDate(newDate)}
         />
         <ListInput
           type="select"
@@ -137,7 +199,7 @@ export default ({ getData, user, onProfile, saveData }) => {
           ))}
         </ListInput>
       </List>
-      <List>
+      <List style={{ pointerEvents: waiting ? "none" : "initial" }}>
         <ListItem title="Name" className="header">
           <StateGroupButtons labels="PLA" slot="after" header={true} onChange={onChange} />
         </ListItem>
@@ -156,20 +218,21 @@ export default ({ getData, user, onProfile, saveData }) => {
           ))}
       </List>
       <Toolbar hidden={modified} tabbar labels bottom>
-        <Link tabLink="#tab-1" tabLinkActive>
+        <Link tabLink="#tab-attendance" tabLinkActive>
           Attendance
         </Link>
-        <Link tabLink="#tab-2">Behaviour</Link>
-        <Link tabLink="#tab-3">Learning</Link>
+        <Link tabLink="#tab-behaviour">Behaviour</Link>
+        <Link tabLink="#tab-learning">Learning</Link>
       </Toolbar>
       <Toolbar className="button-bar" hidden={!modified} bottom>
-        <Button raised fill color="red" onClick={() => setModified(false)}>
+        <Button raised fill color="red" onClick={onCancel}>
           Cancel
         </Button>
         <Button raised fill color="green" onClick={onSave}>
           Save
         </Button>
       </Toolbar>
+      <Preloader className="loader" style={{ display: waiting ? "block" : "none" }} />
     </Page>
   );
 };

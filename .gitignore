@@ -38,4 +38,4 @@ Thumbs.db
 
 # Production build
 www/
-vars.json
+env.json
