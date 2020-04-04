@@ -14,9 +14,9 @@ const toJson = table => {
   }, []);
 };
 
-const SPREADSHEET_ID = window.location.origin.includes(env.ORIGIN)
-  ? env.SPREADSHEET_ID_PROD
-  : env.SPREADSHEET_ID_DEV;
+const isProd = window.location.origin.includes(env.ORIGIN);
+const SPREADSHEET_ID = isProd ? env.SPREADSHEET_ID_PROD : env.SPREADSHEET_ID_DEV;
+console.log({ isProd, SPREADSHEET_ID });
 
 const setMultiple = rangesAndValues => {
   const data = rangesAndValues.map(([range, value]) => ({

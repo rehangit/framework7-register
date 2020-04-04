@@ -30,23 +30,16 @@ const calendarParams = {
   closeByBackdropClick: true,
   openIn: "customModal",
   backdrop: true,
-
-  rangesClasses: [
-    {
-      cssClass: "weekday-madrasah-on",
-      range: date => date.getDay() >= 1 && date.getDay() <= 4,
-    },
-  ],
 };
 
 const dateToSerial = date => Math.floor((date - new Date("1900-01-01")) / (1000 * 3600 * 24));
 
 export default ({ getData, getHeaders, user, onProfile, saveData }) => {
-  const [names, setNames] = React.useState([]);
+  const [students, setStudents] = React.useState([]);
   const [dates, setDates] = React.useState([]);
 
   const [sections, setSections] = React.useState([]);
-  const [students, setStudents] = React.useState([]);
+  const [selectedStudents, setSelectedStudents] = React.useState([]);
   const [scoreType, setScoreType] = React.useState("Attendance");
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [selectedSection, setSelectedSection] = React.useState();
@@ -55,17 +48,22 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
 
   const modified = React.useMemo(() => {
     console.log("modified memo");
-    const mods = students.reduce((acc, { value, orig }) => acc || value !== orig, false);
+    const mods = selectedStudents.reduce((acc, { value, orig }) => acc || value !== orig, false);
     console.log("onChange", { mods });
     return mods;
-  }, [students]);
+  }, [selectedStudents]);
+
+  React.useEffect(() => {
+    if (selectedSection && sections.includes(selectedSection))
+      window.localStorage.setItem("selectedSection", selectedSection);
+  }, [selectedSection]);
 
   React.useEffect(() => {
     setWaiting(true);
     getHeaders(scoreType).then(headers => {
       console.log("React.useEffect[user]", headers);
 
-      setNames(headers.names);
+      setStudents(headers.names);
       setDates(headers.dates);
 
       setWaiting(false);
@@ -73,25 +71,35 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
   }, [user]);
 
   React.useEffect(() => {
-    if (!names || !names.length) return;
-    const sectionsSet = names.reduce((acc, { section }) => {
+    if (!students || !students.length) return;
+    const sectionsSet = students.reduce((acc, { section }) => {
       acc.add(section);
       return acc;
     }, new Set());
 
-    const sections = Array.from(sectionsSet).filter(Boolean);
-    setSections(sections);
-    setSelectedSection(selectedSection || sections[0]);
+    const newSections = Array.from(sectionsSet).filter(Boolean);
+    console.log("React.useEffect [students]", { selectedSection, newSections });
+    setSections(newSections);
 
-    console.log("React.useEffect[names]", { names, sections });
-  }, [names]);
+    if (!selectedSection) {
+      const storedSelectedSection = window.localStorage.getItem("selectedSection");
+      console.log({ storedSelectedSection });
+      if (storedSelectedSection && newSections.includes(storedSelectedSection))
+        setSelectedSection(storedSelectedSection);
+      else {
+        setSelectedSection(newSections[0]);
+      }
+    }
+
+    console.log("React.useEffect [students]", { students, newSections });
+  }, [students]);
 
   React.useEffect(() => {
     setWaiting(true);
 
     const serial = dateToSerial(selectedDate);
     const col = 3 + dates.findIndex(d => d === serial);
-    const indices = names.reduce((acc, { section }, row) => {
+    const indices = students.reduce((acc, { section }, row) => {
       if (section === selectedSection) {
         acc.push([row, col]);
       }
@@ -101,12 +109,12 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     getData({ scoreType, indices }).then(data => {
       console.log("React.useEffect [selectedDate, selectedSection]", { data });
       const sdata = data.map(({ index, value }) => ({
-        ...names[index],
+        ...students[index],
         index,
         value,
         orig: value,
       }));
-      setStudents(sdata);
+      setSelectedStudents(sdata);
 
       setWaiting(false);
       console.log({ sdata });
@@ -117,18 +125,18 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     (value, name) => {
       console.log("onChange", value, name, selectedSection);
       if (name) {
-        const index = students.findIndex(s => s.name === name);
-        students[index].value = value;
+        const index = selectedStudents.findIndex(s => s.name === name);
+        selectedStudents[index].value = value;
       } else {
-        students.forEach((s, i) => {
+        selectedStudents.forEach((s, i) => {
           if (s.section === selectedSection) {
-            students[i].value = value;
+            selectedStudents[i].value = value;
           }
         });
       }
-      setStudents(students.slice());
+      setSelectedStudents(selectedStudents.slice());
     },
-    [students, selectedSection]
+    [selectedStudents, selectedSection]
   );
 
   const onSave = React.useCallback(() => {
@@ -136,7 +144,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     setWaiting(true);
     const serial = dateToSerial(selectedDate);
     const colIndex = 3 + dates.findIndex(d => d === serial);
-    const values = students.reduce((acc, { index, value, orig }) => {
+    const values = selectedStudents.reduce((acc, { index, value, orig }) => {
       if (value != orig) {
         acc.push({ ri: index, ci: colIndex, value });
       }
@@ -144,22 +152,22 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     }, []);
     console.log("saving data:", { scoreType, date: selectedDate, values });
     saveData({ scoreType, values }).then(() => {
-      setStudents(
-        students.map((s, i) => {
+      setSelectedStudents(
+        selectedStudents.map((s, i) => {
           s.orig = s.value;
           return s;
         })
       );
       setWaiting(false);
     });
-  }, [selectedDate, students, modified]);
+  }, [selectedDate, selectedStudents, modified]);
 
   const onCancel = React.useCallback(() => {
-    students.forEach((s, i) => {
-      students[i].value = s.orig;
+    selectedStudents.forEach((s, i) => {
+      selectedStudents[i].value = s.orig;
     });
-    setStudents(students.slice());
-  }, [students]);
+    setSelectedStudents(selectedStudents.slice());
+  }, [selectedStudents]);
 
   const name = (f7 && f7.params.name) || "";
 
@@ -187,7 +195,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
         <ListInput
           type="select"
           label="Class"
-          defaultValue={selectedSection}
+          value={selectedSection}
           outline
           onChange={e => setSelectedSection(e.target.value)}
           disabled={modified}
@@ -203,7 +211,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
         <ListItem title="Name" className="header">
           <StateGroupButtons labels="PLA" slot="after" header={true} onChange={onChange} />
         </ListItem>
-        {students
+        {selectedStudents
           .filter(s => s.section === selectedSection)
           .map(({ name, value, section, orig }) => (
             <ListItem title={name} key={name}>
@@ -217,7 +225,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
             </ListItem>
           ))}
       </List>
-      <Toolbar hidden={modified} tabbar labels bottom>
+      <Toolbar hidden={modified} tabbar bottom>
         <Link tabLink="#tab-attendance" tabLinkActive>
           Attendance
         </Link>

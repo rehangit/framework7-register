@@ -1,15 +1,13 @@
 import React from "react";
 import "framework7-icons";
 
-import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES } from "../config/env.json";
+import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES, ORIGIN } from "../config/env.json";
 
 import MainPage from "../pages/main";
 import MyLoginScreen from "../pages/login";
 import { getSheet, getMultipleRanges, setMultiple } from "../data/googleApi";
 
-import { App, View } from "framework7-react";
-
-import { SignInProfile } from "./profile";
+import { App, View, Panel, Navbar, Block } from "framework7-react";
 
 const indexToLetter = n => {
   const a = Math.floor(n / 26);
@@ -20,6 +18,7 @@ const indexToLetter = n => {
 const serialToDate = serial => new Date(Math.floor(serial - 25569) * 86400 * 1000);
 const dateToSerial = date => Math.floor((date - new Date("1900-01-01")) / (1000 * 3600 * 24));
 
+const isProd = window.location.origin.includes(ORIGIN);
 export default class extends React.Component {
   constructor() {
     super();
@@ -27,8 +26,8 @@ export default class extends React.Component {
     this.state = {
       // Framework7 Parameters
       f7params: {
-        name: "Register", // App name
-        id: "com.rehan.register",
+        name: "Register" + (isProd ? "" : " *"), // App name
+        id: "com.bilalmasjid.registerapp",
       },
 
       user: {},
@@ -160,7 +159,7 @@ export default class extends React.Component {
 
   componentDidMount() {
     console.log("COMPONENTDIDMOUNT");
-    if (gapi && gapi.auth2) {
+    if (window.gapi && window.gapi.auth2) {
       console.log("GAPI - already available");
       this.onGapiAvailable();
     } else {

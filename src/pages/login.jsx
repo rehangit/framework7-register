@@ -12,7 +12,6 @@ import {
   ListButton,
   List,
 } from "framework7-react";
-import { SignInProfile } from "../components/profile";
 
 export default ({ parent, show }) => {
   const { f7params, signedIn, user } = parent.state;
