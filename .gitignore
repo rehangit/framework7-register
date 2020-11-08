@@ -39,3 +39,6 @@ Thumbs.db
 # Production build
 www/
 env.json
+.gitsecret/keys/random_seed
+!*.secret
+.vscode
