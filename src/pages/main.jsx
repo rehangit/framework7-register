@@ -32,7 +32,14 @@ const calendarParams = {
   backdrop: true,
 };
 
-const dateToSerial = date => Math.floor((date - new Date("1900-01-01")) / (1000 * 3600 * 24));
+const dateToSerial = date => {
+  const startOfDay = new Date(new Date(date).toISOString().slice(0, 10));
+  const serial = Math.floor(
+    (startOfDay - new Date("1899-12-30")) / (1000 * 3600 * 24)
+  );
+  console.log("Converting date to serial", { date, serial });
+  return serial;
+};
 
 export default ({ getData, getHeaders, user, onProfile, saveData }) => {
   const [students, setStudents] = React.useState([]);
@@ -48,7 +55,10 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
 
   const modified = React.useMemo(() => {
     console.log("modified memo");
-    const mods = selectedStudents.reduce((acc, { value, orig }) => acc || value !== orig, false);
+    const mods = selectedStudents.reduce(
+      (acc, { value, orig }) => acc || value !== orig,
+      false
+    );
     console.log("onChange", { mods });
     return mods;
   }, [selectedStudents]);
@@ -61,7 +71,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
   React.useEffect(() => {
     setWaiting(true);
     getHeaders(scoreType).then(headers => {
-      console.log("React.useEffect[user]", headers);
+      console.log("extracted headers", headers);
 
       setStudents(headers.names);
       setDates(headers.dates);
@@ -82,7 +92,9 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     setSections(newSections);
 
     if (!selectedSection) {
-      const storedSelectedSection = window.localStorage.getItem("selectedSection");
+      const storedSelectedSection = window.localStorage.getItem(
+        "selectedSection"
+      );
       console.log({ storedSelectedSection });
       if (storedSelectedSection && newSections.includes(storedSelectedSection))
         setSelectedSection(storedSelectedSection);
@@ -98,7 +110,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     setWaiting(true);
 
     const serial = dateToSerial(selectedDate);
-    const col = 3 + dates.findIndex(d => d === serial);
+    const col = dates.findIndex(d => d === serial);
     const indices = students.reduce((acc, { section }, row) => {
       if (section === selectedSection) {
         acc.push([row, col]);
@@ -143,7 +155,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     if (!modified) return;
     setWaiting(true);
     const serial = dateToSerial(selectedDate);
-    const colIndex = 3 + dates.findIndex(d => d === serial);
+    const colIndex = dates.findIndex(d => d === serial);
     const values = selectedStudents.reduce((acc, { index, value, orig }) => {
       if (value != orig) {
         acc.push({ ri: index, ci: colIndex, value });
@@ -209,7 +221,12 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
       </List>
       <List style={{ pointerEvents: waiting ? "none" : "initial" }}>
         <ListItem title="Name" className="header">
-          <StateGroupButtons labels="PLA" slot="after" header={true} onChange={onChange} />
+          <StateGroupButtons
+            labels="PLA"
+            slot="after"
+            header={true}
+            onChange={onChange}
+          />
         </ListItem>
         {selectedStudents
           .filter(s => s.section === selectedSection)
@@ -240,7 +257,10 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
           Save
         </Button>
       </Toolbar>
-      <Preloader className="loader" style={{ display: waiting ? "block" : "none" }} />
+      <Preloader
+        className="loader"
+        style={{ display: waiting ? "block" : "none" }}
+      />
     </Page>
   );
 };

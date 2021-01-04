@@ -15,7 +15,9 @@ const toJson = table => {
 };
 
 const isProd = window.location.origin.includes(env.ORIGIN);
-const SPREADSHEET_ID = isProd ? env.SPREADSHEET_ID_PROD : env.SPREADSHEET_ID_DEV;
+const SPREADSHEET_ID = isProd
+  ? env.SPREADSHEET_ID_PROD
+  : env.SPREADSHEET_ID_DEV;
 console.log({ isProd, SPREADSHEET_ID });
 
 const setMultiple = rangesAndValues => {
@@ -44,10 +46,17 @@ const getMultipleRanges = async ranges => {
   console.log(">getMultipleRanges", ranges);
   try {
     return gapi.client.sheets.spreadsheets.values
-      .batchGet({ spreadsheetId: SPREADSHEET_ID, ranges, valueRenderOption: "UNFORMATTED_VALUE" })
+      .batchGet({
+        spreadsheetId: SPREADSHEET_ID,
+        ranges,
+        valueRenderOption: "UNFORMATTED_VALUE",
+      })
       .then(response => {
         var result = response.result;
-        console.log(`${result.valueRanges.length} ranges retrieved: `, { ranges, result });
+        console.log(`${result.valueRanges.length} ranges retrieved: `, {
+          ranges,
+          result,
+        });
         const values = result.valueRanges.map(({ values }) => values);
         console.log({ values });
         return values;
@@ -58,20 +67,4 @@ const getMultipleRanges = async ranges => {
   }
 };
 
-const getSheet = sheetName =>
-  gapi.client.sheets.spreadsheets.values
-    .get({
-      spreadsheetId: SPREADSHEET_ID,
-      range: sheetName,
-      valueRenderOption: "UNFORMATTED_VALUE",
-    })
-    .then(response => {
-      var range = response.result;
-      if (range.values.length > 0) {
-        const values = toJson(range.values);
-        return values;
-      }
-      return [];
-    });
-
-export { getSheet, getMultipleRanges, setMultiple };
+export { getMultipleRanges, setMultiple };

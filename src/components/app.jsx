@@ -5,7 +5,7 @@ import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES, ORIGIN } from "../config/en
 
 import MainPage from "../pages/main";
 import MyLoginScreen from "../pages/login";
-import { getSheet, getMultipleRanges, setMultiple } from "../data/googleApi";
+import { getMultipleRanges, setMultiple } from "../data/googleApi";
 
 import { App, View, Panel, Navbar, Block } from "framework7-react";
 

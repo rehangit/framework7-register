@@ -18,7 +18,7 @@ const target = process.env.TARGET || "web";
 module.exports = {
   mode: env,
   entry: {
-    app: "./src/js/app.js"
+    app: "./src/js/app.js",
   },
   output: {
     path: resolvePath("www"),
@@ -26,13 +26,13 @@ module.exports = {
     chunkFilename: "js/[name].js",
     publicPath: "",
     hotUpdateChunkFilename: "hot/hot-update.js",
-    hotUpdateMainFilename: "hot/hot-update.json"
+    hotUpdateMainFilename: "hot/hot-update.json",
   },
   resolve: {
     extensions: [".js", ".jsx", ".json"],
     alias: {
-      "@": resolvePath("src")
-    }
+      "@": resolvePath("src"),
+    },
   },
   devtool: env === "production" ? "source-map" : "eval",
   devServer: {
@@ -43,17 +43,17 @@ module.exports = {
     disableHostCheck: true,
     historyApiFallback: true,
     watchOptions: {
-      poll: 1000
+      poll: 1000,
     },
     host: "localhost",
-    port: 80
+    port: 8080,
   },
   optimization: {
     minimizer: [
       new TerserPlugin({
-        sourceMap: true
-      })
-    ]
+        sourceMap: true,
+      }),
+    ],
   },
   module: {
     rules: [
@@ -68,8 +68,8 @@ module.exports = {
 
           resolvePath("node_modules/template7"),
           resolvePath("node_modules/dom7"),
-          resolvePath("node_modules/ssr-window")
-        ]
+          resolvePath("node_modules/ssr-window"),
+        ],
       },
 
       {
@@ -80,12 +80,12 @@ module.exports = {
             : {
                 loader: MiniCssExtractPlugin.loader,
                 options: {
-                  publicPath: "../"
-                }
+                  publicPath: "../",
+                },
               },
           "css-loader",
-          "postcss-loader"
-        ]
+          "postcss-loader",
+        ],
       },
       {
         test: /\.styl(us)?$/,
@@ -95,13 +95,13 @@ module.exports = {
             : {
                 loader: MiniCssExtractPlugin.loader,
                 options: {
-                  publicPath: "../"
-                }
+                  publicPath: "../",
+                },
               },
           "css-loader",
           "postcss-loader",
-          "stylus-loader"
-        ]
+          "stylus-loader",
+        ],
       },
       {
         test: /\.less$/,
@@ -111,13 +111,13 @@ module.exports = {
             : {
                 loader: MiniCssExtractPlugin.loader,
                 options: {
-                  publicPath: "../"
-                }
+                  publicPath: "../",
+                },
               },
           "css-loader",
           "postcss-loader",
-          "less-loader"
-        ]
+          "less-loader",
+        ],
       },
       {
         test: /\.(sa|sc)ss$/,
@@ -127,44 +127,44 @@ module.exports = {
             : {
                 loader: MiniCssExtractPlugin.loader,
                 options: {
-                  publicPath: "../"
-                }
+                  publicPath: "../",
+                },
               },
           "css-loader",
           "postcss-loader",
-          "sass-loader"
-        ]
+          "sass-loader",
+        ],
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: "url-loader",
         options: {
           limit: 10000,
-          name: "images/[name].[ext]"
-        }
+          name: "images/[name].[ext]",
+        },
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac|m4a)(\?.*)?$/,
         loader: "url-loader",
         options: {
           limit: 10000,
-          name: "media/[name].[ext]"
-        }
+          name: "media/[name].[ext]",
+        },
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         loader: "url-loader",
         options: {
           limit: 10000,
-          name: "fonts/[name].[ext]"
-        }
-      }
-    ]
+          name: "fonts/[name].[ext]",
+        },
+      },
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify(env),
-      "process.env.TARGET": JSON.stringify(target)
+      "process.env.TARGET": JSON.stringify(target),
     }),
 
     ...(env === "production"
@@ -172,15 +172,15 @@ module.exports = {
           new OptimizeCSSPlugin({
             cssProcessorOptions: {
               safe: true,
-              map: { inline: false }
-            }
+              map: { inline: false },
+            },
           }),
-          new webpack.optimize.ModuleConcatenationPlugin()
+          new webpack.optimize.ModuleConcatenationPlugin(),
         ]
       : [
           // Development only plugins
           new webpack.HotModuleReplacementPlugin(),
-          new webpack.NamedModulesPlugin()
+          new webpack.NamedModulesPlugin(),
         ]),
     new HtmlWebpackPlugin({
       filename: "./index.html",
@@ -194,18 +194,18 @@ module.exports = {
               removeRedundantAttributes: true,
               removeScriptTypeAttributes: true,
               removeStyleLinkTypeAttributes: true,
-              useShortDoctype: true
+              useShortDoctype: true,
             }
-          : false
+          : false,
     }),
     new MiniCssExtractPlugin({
-      filename: "css/[name].css"
+      filename: "css/[name].css",
     }),
     new CopyWebpackPlugin([
       {
         from: resolvePath("src/static"),
-        to: resolvePath("www/static")
-      }
-    ])
-  ]
+        to: resolvePath("www/static"),
+      },
+    ]),
+  ],
 };
