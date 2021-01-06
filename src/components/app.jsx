@@ -1,7 +1,13 @@
 import React from "react";
 import "framework7-icons";
 
-import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES, ORIGIN } from "../config/env.json";
+import {
+  API_KEY,
+  CLIENT_ID,
+  DISCOVERY_DOCS,
+  SCOPES,
+  ORIGIN,
+} from "../config/env.json";
 
 import MainPage from "../pages/main";
 import MyLoginScreen from "../pages/login";
@@ -15,8 +21,10 @@ const indexToLetter = n => {
   else return "";
 };
 
-const serialToDate = serial => new Date(Math.floor(serial - 25569) * 86400 * 1000);
-const dateToSerial = date => Math.floor((date - new Date("1900-01-01")) / (1000 * 3600 * 24));
+const serialToDate = serial =>
+  new Date(Math.floor(serial - 25569) * 86400 * 1000);
+const dateToSerial = date =>
+  Math.floor((date - new Date("1900-01-01")) / (1000 * 3600 * 24));
 
 const isProd = window.location.origin.includes(ORIGIN);
 export default class extends React.Component {
@@ -38,11 +46,18 @@ export default class extends React.Component {
 
   async getHeaders(scoreType) {
     if (!this.state.signedIn) return [];
-    const result = await getMultipleRanges([`${scoreType}!A2:C`, `${scoreType}!1:1`]);
+    const result = await getMultipleRanges([
+      `${scoreType}!A2:C`,
+      `${scoreType}!1:1`,
+    ]);
     if (!result || !result.length) return [];
     const [namesRows, [dates]] = result;
-    const names = namesRows.map(([id, name, section]) => ({ id, name, section }));
-    console.log("getHeaders", { names, dates });
+    const names = namesRows.map(([id, name, section]) => ({
+      id,
+      name,
+      section,
+    }));
+    console.log("getHeaders", scoreType, { names, dates });
 
     return { names, dates };
   }
@@ -91,7 +106,11 @@ export default class extends React.Component {
       if (signedIn) {
         const current = await gapi.auth2.getAuthInstance().currentUser.get();
         const profile = await current.getBasicProfile();
-        const [name, email, image] = [profile.getName(), profile.getEmail(), profile.getImageUrl()];
+        const [name, email, image] = [
+          profile.getName(),
+          profile.getEmail(),
+          profile.getImageUrl(),
+        ];
         const user = { name, email, image };
         this.setState({ user });
         this.setState({ showLogin: false });

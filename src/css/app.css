@@ -17,7 +17,8 @@
   color: gold;
 }
 
-.calendar-day-today.calendar-day-selected.weekday-madrasah-on .calendar-day-number {
+.calendar-day-today.calendar-day-selected.weekday-madrasah-on
+  .calendar-day-number {
   background-color: var(--f7-calendar-selected-bg-color, var(--f7-theme-color));
 }
 

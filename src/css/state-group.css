@@ -1,19 +1,46 @@
-.state-group .P,
-.state-group .A,
-.state-group .L {
+.state-group .label-P,
+.state-group .label-A,
+.state-group .label-L {
   padding-left: 15px;
   padding-right: 15px;
   overflow: initial;
 }
 
-.state-group .button-active.P {
+.state-group .label-0,
+.state-group .label-1,
+.state-group .label-2,
+.state-group .label-3,
+.state-group .label-4 {
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.state-group .button-active.label-P {
   background-color: green;
 }
-.state-group .button-active.L {
+.state-group .button-active.label-L {
   background-color: orange;
 }
-.state-group .button-active.A {
+.state-group .button-active.label-A {
   background-color: red;
+}
+
+.state-group .button-active.label-0 {
+  background-color: red;
+}
+.state-group .button-active.label-1 {
+  background-color: purple;
+}
+.state-group .button-active.label-2 {
+  background-color: gray;
+}
+.state-group .button-active.label-3 {
+  background-color: blue;
+}
+.state-group .button-active.label-4 {
+  background-color: green;
 }
 
 .header {

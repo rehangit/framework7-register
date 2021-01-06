@@ -10,14 +10,13 @@ export default ({ labels, onChange, value, slot, header, isDirty }) => {
       {labels.split("").map((label, i) => (
         <Button
           key={i}
-          active={value === label || header}
+          active={(value && value.toString() === label) || header}
           onClick={() => {
             onChange(label);
           }}
-          className={label}
-        >
-          {label}
-        </Button>
+          className={`label-${label}`}
+          text={label}
+        />
       ))}
     </Segmented>
   );

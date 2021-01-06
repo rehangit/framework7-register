@@ -16,11 +16,13 @@ import {
   f7,
   Block,
   Preloader,
+  Tab,
+  Tabs,
 } from "framework7-react";
 
 import { SignInProfile } from "../components/profile";
 
-import StateGroupButtons from "../components/state-group";
+import ScoreTab from "./ScroreTab";
 
 const calendarParams = {
   header: true,
@@ -42,6 +44,7 @@ const dateToSerial = date => {
 };
 
 export default ({ getData, getHeaders, user, onProfile, saveData }) => {
+  const [scoreHeaders, setScoreHeaders] = React.useState({});
   const [students, setStudents] = React.useState([]);
   const [dates, setDates] = React.useState([]);
 
@@ -70,15 +73,31 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
 
   React.useEffect(() => {
     setWaiting(true);
-    getHeaders(scoreType).then(headers => {
-      console.log("extracted headers", headers);
+    const getAllHeaders = async () => {
+      return Promise.all([
+        getHeaders("Attendance"),
+        getHeaders("Behaviour"),
+        getHeaders("Learning"),
+      ]);
+    };
 
-      setStudents(headers.names);
-      setDates(headers.dates);
-
+    getAllHeaders().then(([a, b, l]) => {
+      setScoreHeaders({ Attendance: a, Behaviour: b, Learning: l });
+      setScoreType("Attendance");
+      console.log("All headers received", [a, b, l]);
       setWaiting(false);
     });
   }, [user]);
+
+  React.useEffect(() => {
+    setWaiting(true);
+
+    if (scoreHeaders && scoreHeaders[scoreType]) {
+      setStudents(scoreHeaders[scoreType].names);
+      setDates(scoreHeaders[scoreType].dates);
+    }
+    setWaiting(false);
+  }, [scoreType, scoreHeaders]);
 
   React.useEffect(() => {
     if (!students || !students.length) return;
@@ -87,7 +106,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
       return acc;
     }, new Set());
 
-    const newSections = Array.from(sectionsSet).filter(Boolean);
+    const newSections = Array.from(sectionsSet).filter(Boolean).sort();
     console.log("React.useEffect [students]", { selectedSection, newSections });
     setSections(newSections);
 
@@ -109,6 +128,8 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
   React.useEffect(() => {
     setWaiting(true);
 
+    if (!students || !students.length || !dates || !dates.length) return;
+
     const serial = dateToSerial(selectedDate);
     const col = dates.findIndex(d => d === serial);
     const indices = students.reduce((acc, { section }, row) => {
@@ -119,19 +140,23 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     }, []);
 
     getData({ scoreType, indices }).then(data => {
-      console.log("React.useEffect [selectedDate, selectedSection]", { data });
-      const sdata = data.map(({ index, value }) => ({
-        ...students[index],
-        index,
-        value,
-        orig: value,
-      }));
+      console.log("getData for scoreType", scoreType, "indices", indices, {
+        data,
+      });
+      const sdata = data
+        .map(({ index, value }) => ({
+          ...students[index],
+          index,
+          value,
+          orig: value,
+        }))
+        .sort((a, b) => (a.name < b.name ? -1 : 1));
       setSelectedStudents(sdata);
 
       setWaiting(false);
       console.log({ sdata });
     });
-  }, [selectedDate, selectedSection]);
+  }, [selectedDate, selectedSection, scoreType, students, dates]);
 
   const onChange = React.useCallback(
     (value, name) => {
@@ -194,7 +219,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
           }}
         />
       </Navbar>
-      <List inlineLabels>
+      <List inlineLabels className="settings">
         <ListInput
           type="datepicker"
           label="Date"
@@ -219,36 +244,28 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
           ))}
         </ListInput>
       </List>
-      <List style={{ pointerEvents: waiting ? "none" : "initial" }}>
-        <ListItem title="Name" className="header">
-          <StateGroupButtons
-            labels="PLA"
-            slot="after"
-            header={true}
-            onChange={onChange}
-          />
-        </ListItem>
-        {selectedStudents
-          .filter(s => s.section === selectedSection)
-          .map(({ name, value, section, orig }) => (
-            <ListItem title={name} key={name}>
-              <Icon slot="media" f7="person"></Icon>
-              <StateGroupButtons
-                labels="PLA"
-                value={value}
-                isDirty={orig !== value}
-                onChange={value => onChange(value, name)}
-              />
-            </ListItem>
-          ))}
-      </List>
       <Toolbar hidden={modified} tabbar bottom>
-        <Link tabLink="#tab-attendance" tabLinkActive>
-          Attendance
-        </Link>
-        <Link tabLink="#tab-behaviour">Behaviour</Link>
-        <Link tabLink="#tab-learning">Learning</Link>
+        <Link tabLink="#Attendance">Attendance</Link>
+        <Link tabLink="#Behaviour">Behaviour</Link>
+        <Link tabLink="#Learning">Learning</Link>
       </Toolbar>
+      <Tabs animated swipeable className="tabs">
+        {[
+          ["Attendance", "PLA"],
+          ["Behaviour", "01234"],
+          ["Learning", "01234"],
+        ].map(([type, labels]) => (
+          <ScoreTab
+            scoreType={type}
+            scoreLabels={labels}
+            setScoreType={setScoreType}
+            onChange={onChange}
+            selectedStudents={selectedStudents}
+            selectedSection={selectedSection}
+            waiting={waiting}
+          />
+        ))}
+      </Tabs>
       <Toolbar className="button-bar" hidden={!modified} bottom>
         <Button raised fill color="red" onClick={onCancel}>
           Cancel

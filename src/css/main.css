@@ -14,3 +14,11 @@
   left: 45%;
   z-index: 100;
 }
+
+.tabs {
+  padding-bottom: 80px;
+}
+
+.settings {
+  margin: 3px 0 -32px;
+}

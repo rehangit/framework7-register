@@ -26,39 +26,45 @@ const setMultiple = rangesAndValues => {
     values: [[value]],
     majorDimension: "ROWS",
   }));
-  console.log("setMultiple", { data });
-  console.log("setMultiple params", {
+  const batchParams = {
     spreadsheetId: SPREADSHEET_ID,
     resource: { data, valueInputOption: "USER_ENTERED" },
-  });
+  };
+  console.log("setMultiple", { data });
+  console.log("setMultiple params", batchParams);
   return gapi.client.sheets.spreadsheets.values
-    .batchUpdate({
-      spreadsheetId: SPREADSHEET_ID,
-      resource: { data, valueInputOption: "USER_ENTERED" },
-    })
+    .batchUpdate(batchParams)
     .then(response => {
       var result = response.result;
-      console.log(`${result.totalUpdatedCells} cells updated.`, result);
+      console.log(
+        `setMultiple batchUpdate ${result.totalUpdatedCells} cells updated.`,
+        result
+      );
     });
 };
 
 const getMultipleRanges = async ranges => {
   console.log(">getMultipleRanges", ranges);
+  const batchParams = {
+    spreadsheetId: SPREADSHEET_ID,
+    ranges,
+    valueRenderOption: "UNFORMATTED_VALUE",
+  };
+  console.log("getMultipleRanges batchParams", batchParams);
   try {
     return gapi.client.sheets.spreadsheets.values
-      .batchGet({
-        spreadsheetId: SPREADSHEET_ID,
-        ranges,
-        valueRenderOption: "UNFORMATTED_VALUE",
-      })
+      .batchGet(batchParams)
       .then(response => {
         var result = response.result;
-        console.log(`${result.valueRanges.length} ranges retrieved: `, {
-          ranges,
-          result,
-        });
+        console.log(
+          `getMultipleRanges batchGet ${result.valueRanges.length} ranges retrieved: `,
+          {
+            ranges,
+            result,
+          }
+        );
         const values = result.valueRanges.map(({ values }) => values);
-        console.log({ values });
+        console.log("getMultipleRanges return values", { values });
         return values;
       });
   } catch (err) {
