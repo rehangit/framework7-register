@@ -1,7 +1,7 @@
-import React from "react";
-import { Link, f7, theme, Block } from "framework7-react";
+import React from 'react';
+import { Link, f7, theme, Block } from 'framework7-react';
 
-import "../css/profile.css";
+import '../css/profile.css';
 
 export function SignInProfile({ user, onClick }) {
   if (!f7 || !f7.params) return null;

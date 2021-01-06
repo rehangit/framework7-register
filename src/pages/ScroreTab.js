@@ -1,7 +1,7 @@
-import React from "react";
-import "framework7-icons";
+import React from 'react';
+import 'framework7-icons';
 
-import "../css/main.css";
+import '../css/main.css';
 
 import {
   Page,
@@ -18,9 +18,9 @@ import {
   Preloader,
   Tab,
   Tabs,
-} from "framework7-react";
+} from 'framework7-react';
 
-import StateGroupButtons from "../components/state-group";
+import StateGroupButtons from '../components/state-group';
 
 export default ({
   scoreType,
@@ -33,7 +33,7 @@ export default ({
 }) => {
   return (
     <Tab id={scoreType} onTabShow={({ id }) => setScoreType(id)}>
-      <List style={{ pointerEvents: waiting ? "none" : "initial" }}>
+      <List style={{ pointerEvents: waiting ? 'none' : 'initial' }}>
         <ListItem title="Name" className="header">
           <StateGroupButtons
             labels={scoreLabels}
@@ -43,14 +43,14 @@ export default ({
           />
         </ListItem>
         {selectedStudents
-          .filter(s => s.section === selectedSection)
+          .filter((s) => s.section === selectedSection)
           .map(({ name, value, section, orig }) => (
             <ListItem title={name} key={name}>
               <StateGroupButtons
                 labels={scoreLabels}
                 value={value}
                 isDirty={orig !== value}
-                onChange={value => onChange(value, name)}
+                onChange={(value) => onChange(value, name)}
               />
             </ListItem>
           ))}

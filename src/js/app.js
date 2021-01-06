@@ -19,10 +19,7 @@ import '../css/app.css';
 import App from '../components/app.jsx';
 
 // Init F7 Vue Plugin
-Framework7.use(Framework7React)
+Framework7.use(Framework7React);
 
 // Mount React App
-ReactDOM.render(
-  React.createElement(App),
-  document.getElementById('app'),
-);
+ReactDOM.render(React.createElement(App), document.getElementById('app'));

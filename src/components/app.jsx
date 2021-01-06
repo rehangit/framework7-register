@@ -1,5 +1,5 @@
-import React from "react";
-import "framework7-icons";
+import React from 'react';
+import 'framework7-icons';
 
 import {
   API_KEY,
@@ -7,24 +7,24 @@ import {
   DISCOVERY_DOCS,
   SCOPES,
   ORIGIN,
-} from "../config/env.json";
+} from '../config/env.json';
 
-import MainPage from "../pages/main";
-import MyLoginScreen from "../pages/login";
-import { getMultipleRanges, setMultiple } from "../data/googleApi";
+import MainPage from '../pages/main';
+import MyLoginScreen from '../pages/login';
+import { getMultipleRanges, setMultiple } from '../data/googleApi';
 
-import { App, View, Panel, Navbar, Block } from "framework7-react";
+import { App, View, Panel, Navbar, Block } from 'framework7-react';
 
-const indexToLetter = n => {
+const indexToLetter = (n) => {
   const a = Math.floor(n / 26);
   if (a >= 0) return indexToLetter(a - 1) + String.fromCharCode(65 + (n % 26));
-  else return "";
+  else return '';
 };
 
-const serialToDate = serial =>
+const serialToDate = (serial) =>
   new Date(Math.floor(serial - 25569) * 86400 * 1000);
-const dateToSerial = date =>
-  Math.floor((date - new Date("1900-01-01")) / (1000 * 3600 * 24));
+const dateToSerial = (date) =>
+  Math.floor((date - new Date('1900-01-01')) / (1000 * 3600 * 24));
 
 const isProd = window.location.origin.includes(ORIGIN);
 export default class extends React.Component {
@@ -34,8 +34,8 @@ export default class extends React.Component {
     this.state = {
       // Framework7 Parameters
       f7params: {
-        name: "Register" + (isProd ? "" : " *"), // App name
-        id: "com.bilalmasjid.registerapp",
+        name: 'Register' + (isProd ? '' : ' *'), // App name
+        id: 'com.bilalmasjid.registerapp',
       },
 
       user: {},
@@ -57,7 +57,7 @@ export default class extends React.Component {
       name,
       section,
     }));
-    console.log("getHeaders", scoreType, { names, dates });
+    console.log('getHeaders', scoreType, { names, dates });
 
     return { names, dates };
   }
@@ -70,16 +70,16 @@ export default class extends React.Component {
       return `${scoreType}!${col}${2 + ri}`;
     });
 
-    console.log("getData", { ranges });
+    console.log('getData', { ranges });
 
     const colData = await getMultipleRanges(ranges);
-    console.log("getData", { colData, indices });
+    console.log('getData', { colData, indices });
 
     const data = indices.map(([ri], i) => ({
       index: ri,
       value: colData && colData[i] && colData[i][0][0],
     }));
-    console.log("getData", { data });
+    console.log('getData', { data });
     return data;
   }
 
@@ -95,7 +95,7 @@ export default class extends React.Component {
           return [range, value];
         })) ||
       [];
-    console.log("saveData", { rangesAndValues });
+    console.log('saveData', { rangesAndValues });
     await setMultiple(rangesAndValues);
   }
 
@@ -118,12 +118,12 @@ export default class extends React.Component {
         this.setState({ user: {} });
       }
     } catch (err) {
-      console.log("Update User error:", { err });
+      console.log('Update User error:', { err });
     }
   }
 
   onGapiAvailable() {
-    console.log("ONGAPIAVALABLE", gapi, gapi.client);
+    console.log('ONGAPIAVALABLE', gapi, gapi.client);
     if (gapi && gapi.client && gapi.client.init)
       gapi.client
         .init({
@@ -139,13 +139,13 @@ export default class extends React.Component {
   }
 
   signOut(attempt = 0) {
-    console.log(">signOut", attempt);
+    console.log('>signOut', attempt);
     gapi.auth2
       .getAuthInstance()
       .signOut()
-      .then(params => {
+      .then((params) => {
         const signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
-        console.log(">signOut > then", { signedIn, params });
+        console.log('>signOut > then', { signedIn, params });
         if (signedIn && attempt < 3) {
           setTimeout(() => this.signOut(++attempt), 1000);
           return;
@@ -166,24 +166,24 @@ export default class extends React.Component {
     try {
       gapi.auth2
         .getAuthInstance()
-        .signIn({ prompt: "select_account" })
+        .signIn({ prompt: 'select_account' })
         .then(() => {
           this.updateUser();
         });
     } catch (err) {
-      console.log(">signIn", { err });
+      console.log('>signIn', { err });
       window.location.reload();
     }
   }
 
   componentDidMount() {
-    console.log("COMPONENTDIDMOUNT");
+    console.log('COMPONENTDIDMOUNT');
     if (window.gapi && window.gapi.auth2) {
-      console.log("GAPI - already available");
+      console.log('GAPI - already available');
       this.onGapiAvailable();
     } else {
       console.log("listening for 'gapi_available'");
-      addEventListener("gapi_available", () => this.onGapiAvailable());
+      addEventListener('gapi_available', () => this.onGapiAvailable());
     }
   }
 

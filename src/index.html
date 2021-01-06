@@ -26,7 +26,10 @@
     <title>Register</title>
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <link rel="apple-touch-icon" href="static/icons/apple-touch-icon.png" />
     <link rel="icon" href="static/icons/favicon.png" />
 
@@ -38,12 +41,12 @@
     <!-- built script files will be auto injected -->
     <script>
       function onGapi(self) {
-        self.onload = function() {};
-        console.log("GAPI onload called");
-        gapi.load("client:auth2", () => {
-          console.log("GAPI dispatching gapi event");
-          document.getElementById("app").dispatchEvent(
-            new Event("gapi_available", {
+        self.onload = function () {};
+        console.log('GAPI onload called');
+        gapi.load('client:auth2', () => {
+          console.log('GAPI dispatching gapi event');
+          document.getElementById('app').dispatchEvent(
+            new Event('gapi_available', {
               bubbles: true,
             })
           );

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 import {
   f7,
@@ -11,7 +11,7 @@ import {
   View,
   ListButton,
   List,
-} from "framework7-react";
+} from 'framework7-react';
 
 export default ({ parent, show }) => {
   const { f7params, signedIn, user } = parent.state;
@@ -22,7 +22,7 @@ export default ({ parent, show }) => {
           <LoginScreenTitle>{f7params.name}</LoginScreenTitle>
           <List>
             <ListButton fill large raised onClick={() => parent.onSignIn()}>
-              {signedIn ? "Switch Account" : "Sign In"}
+              {signedIn ? 'Switch Account' : 'Sign In'}
             </ListButton>
             {signedIn ? (
               <ListButton raised onClick={() => parent.signOut()}>
@@ -30,10 +30,14 @@ export default ({ parent, show }) => {
               </ListButton>
             ) : null}
           </List>
-          <BlockFooter>Please sign in using your organisation G Suite account</BlockFooter>
+          <BlockFooter>
+            Please sign in using your organisation G Suite account
+          </BlockFooter>
           {signedIn ? (
             <List>
-              <ListButton onClick={() => parent.showLogin(false)}>Cancel</ListButton>
+              <ListButton onClick={() => parent.showLogin(false)}>
+                Cancel
+              </ListButton>
             </List>
           ) : null}
         </Page>
