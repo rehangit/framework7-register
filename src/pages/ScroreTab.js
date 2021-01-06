@@ -23,6 +23,7 @@ import {
 import StateGroupButtons from '../components/state-group';
 
 export default ({
+  type,
   scoreType,
   setScoreType,
   scoreLabels,
@@ -31,8 +32,13 @@ export default ({
   selectedSection,
   waiting,
 }) => {
+  // console.log('Rendering ScoreTab', { type, scoreType, selectedStudents });
   return (
-    <Tab id={scoreType} onTabShow={({ id }) => setScoreType(id)}>
+    <Tab
+      id={type}
+      onTabShow={({ id }) => setScoreType(id)}
+      tabActive={scoreType === type}
+    >
       <List style={{ pointerEvents: waiting ? 'none' : 'initial' }}>
         <ListItem title="Name" className="header">
           <StateGroupButtons

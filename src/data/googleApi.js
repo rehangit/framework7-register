@@ -51,26 +51,22 @@ const getMultipleRanges = async (ranges) => {
     valueRenderOption: 'UNFORMATTED_VALUE',
   };
   console.log('getMultipleRanges batchParams', batchParams);
-  try {
-    return gapi.client.sheets.spreadsheets.values
-      .batchGet(batchParams)
-      .then((response) => {
-        var result = response.result;
-        console.log(
-          `getMultipleRanges batchGet ${result.valueRanges.length} ranges retrieved: `,
-          {
-            ranges,
-            result,
-          }
-        );
-        const values = result.valueRanges.map(({ values }) => values);
-        console.log('getMultipleRanges return values', { values });
-        return values;
-      });
-  } catch (err) {
-    console.log({ err });
-    return [];
-  }
+  return gapi.client.sheets.spreadsheets.values
+    .batchGet(batchParams)
+    .then((response) => {
+      var result = response.result;
+      console.log(
+        `getMultipleRanges batchGet ${result.valueRanges.length} ranges retrieved: `,
+        {
+          ranges,
+          result,
+        }
+      );
+      const values = result.valueRanges.map(({ values }) => values);
+      console.log('getMultipleRanges return values', { values });
+      return values;
+    })
+    .catch(() => []);
 };
 
 export { getMultipleRanges, setMultiple };

@@ -56,21 +56,6 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
 
   const [waiting, setWaiting] = React.useState(false);
 
-  const modified = React.useMemo(() => {
-    console.log('modified memo');
-    const mods = selectedStudents.reduce(
-      (acc, { value, orig }) => acc || value !== orig,
-      false
-    );
-    console.log('onChange', { mods });
-    return mods;
-  }, [selectedStudents]);
-
-  React.useEffect(() => {
-    if (selectedSection && sections.includes(selectedSection))
-      window.localStorage.setItem('selectedSection', selectedSection);
-  }, [selectedSection]);
-
   React.useEffect(() => {
     setWaiting(true);
     const getAllHeaders = async () => {
@@ -84,7 +69,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
     getAllHeaders().then(([a, b, l]) => {
       setScoreHeaders({ Attendance: a, Behaviour: b, Learning: l });
       setScoreType('Attendance');
-      console.log('All headers received', [a, b, l]);
+      //      console.log('All headers received', [a, b, l]);
       setWaiting(false);
     });
   }, [user]);
@@ -126,9 +111,21 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
   }, [students]);
 
   React.useEffect(() => {
-    setWaiting(true);
+    if (selectedSection && sections.includes(selectedSection))
+      window.localStorage.setItem('selectedSection', selectedSection);
+  }, [selectedSection]);
 
-    if (!students || !students.length || !dates || !dates.length) return;
+  React.useEffect(() => {
+    console.log('Getting student data again', {
+      selectedDate,
+      selectedSection,
+      scoreType,
+      students,
+      dates,
+    });
+
+    if (!dates || !students) return;
+    setWaiting(true);
 
     const serial = dateToSerial(selectedDate);
     const col = dates.findIndex((d) => d === serial);
@@ -139,28 +136,36 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
       return acc;
     }, []);
 
-    getData({ scoreType, indices }).then((data) => {
-      console.log('getData for scoreType', scoreType, 'indices', indices, {
-        data,
+    getData({ scoreType, indices })
+      .then((data) =>
+        data
+          .map(({ index, value }) => ({
+            ...students[index],
+            index,
+            value,
+            orig: value,
+          }))
+          .sort((a, b) => (a.name < b.name ? -1 : 1))
+      )
+      .then((sdata) => {
+        setSelectedStudents(sdata);
+        setWaiting(false);
       });
-      const sdata = data
-        .map(({ index, value }) => ({
-          ...students[index],
-          index,
-          value,
-          orig: value,
-        }))
-        .sort((a, b) => (a.name < b.name ? -1 : 1));
-      setSelectedStudents(sdata);
-
-      setWaiting(false);
-      console.log({ sdata });
-    });
   }, [selectedDate, selectedSection, scoreType, students, dates]);
+
+  const modified = React.useMemo(() => {
+    console.log('modified memo');
+    const mods = selectedStudents.reduce(
+      (acc, { value, orig }) => acc || value !== orig,
+      false
+    );
+    console.log('onChange', { mods });
+    return mods;
+  }, [selectedStudents]);
 
   const onChange = React.useCallback(
     (value, name) => {
-      console.log('onChange', value, name, selectedSection);
+      console.log('main.jsx > onChange', value, name, selectedSection);
       if (name) {
         const index = selectedStudents.findIndex((s) => s.name === name);
         selectedStudents[index].value = value;
@@ -208,6 +213,7 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
 
   const name = (f7 && f7.params.name) || '';
 
+  console.log('rendering with', { selectedStudents });
   return (
     <Page>
       <Navbar title={name} innerClass="navbar-inner-spacing">
@@ -249,14 +255,15 @@ export default ({ getData, getHeaders, user, onProfile, saveData }) => {
         <Link tabLink="#Behaviour">Behaviour</Link>
         <Link tabLink="#Learning">Learning</Link>
       </Toolbar>
-      <Tabs animated swipeable className="tabs">
+      <Tabs>
         {[
           ['Attendance', 'PLA'],
           ['Behaviour', '01234'],
           ['Learning', '01234'],
         ].map(([type, labels]) => (
           <ScoreTab
-            scoreType={type}
+            type={type}
+            scoreType={scoreType}
             scoreLabels={labels}
             setScoreType={setScoreType}
             onChange={onChange}
