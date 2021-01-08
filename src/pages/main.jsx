@@ -241,11 +241,12 @@ export default ({ user, onProfile }) => {
             dates,
           },
         });
+        setWaiting(false);
       })
       .catch((err) => {
         setError(err);
+        setWaiting(false);
       });
-    setWaiting(false);
   }, [selectedDate, selectedSection, scoreType, students, dates]);
 
   React.useEffect(() => {
@@ -314,6 +315,7 @@ export default ({ user, onProfile }) => {
             return s;
           })
         );
+        setWaiting(false);
       })
       .catch((err) => {
         console.error(
@@ -322,8 +324,8 @@ export default ({ user, onProfile }) => {
           err
         );
         setError(err);
+        setWaiting(false);
       });
-    setWaiting(false);
   }, [selectedDate, selectedStudents, modified]);
 
   const onCancel = React.useCallback(() => {
