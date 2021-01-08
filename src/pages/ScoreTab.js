@@ -31,8 +31,12 @@ export default ({
   selectedStudents,
   selectedSection,
   waiting,
+  onStudentInfo,
 }) => {
-  // console.log('Rendering ScoreTab', { type, scoreType, selectedStudents });
+  const [sortAsc, setSortAsc] = React.useState(true);
+  const sortFn = sortAsc
+    ? (a, b) => (a.name < b.name ? -1 : 1)
+    : (a, b) => (a.name > b.name ? -1 : 1);
   return (
     <Tab
       id={type}
@@ -40,7 +44,15 @@ export default ({
       tabActive={scoreType === type}
     >
       <List style={{ pointerEvents: waiting ? 'none' : 'initial' }}>
-        <ListItem title="Name" className="header">
+        <ListItem className="header">
+          <div slot="title" onClick={() => setSortAsc(!sortAsc)}>
+            <span>Name</span>
+            <Icon
+              className="sort-icon"
+              f7={sortAsc ? 'sort_down' : 'sort_up'}
+              size="20"
+            />
+          </div>
           <StateGroupButtons
             labels={scoreLabels}
             slot="after"
@@ -49,9 +61,25 @@ export default ({
           />
         </ListItem>
         {selectedStudents
+          .sort(sortFn)
           .filter((s) => s.section === selectedSection)
           .map(({ name, value, section, orig }) => (
-            <ListItem title={name} key={name}>
+            <ListItem
+              key={name}
+              style={{ opacity: 1, transition: 'all 1s ease' }}
+            >
+              <div
+                className="title"
+                slot="title"
+                onClick={() => onStudentInfo({ name, section })}
+              >
+                <Icon
+                  f7="person"
+                  size="22"
+                  style={{ verticalAlign: 'baseline', marginRight: '8px' }}
+                />
+                <span>{name}</span>
+              </div>
               <StateGroupButtons
                 labels={scoreLabels}
                 value={value}

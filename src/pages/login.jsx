@@ -13,19 +13,18 @@ import {
   List,
 } from 'framework7-react';
 
-export default ({ parent, show }) => {
-  const { f7params, signedIn, user } = parent.state;
+export default ({ name, signIn, signOut, signedIn, show }) => {
   return (
     <LoginScreen opened={show} className="the-login-screen">
       <View>
         <Page noToolbar loginScreen noNavbar>
-          <LoginScreenTitle>{f7params.name}</LoginScreenTitle>
+          <LoginScreenTitle>{name}</LoginScreenTitle>
           <List>
-            <ListButton fill large raised onClick={() => parent.onSignIn()}>
+            <ListButton fill large raised onClick={() => signIn()}>
               {signedIn ? 'Switch Account' : 'Sign In'}
             </ListButton>
             {signedIn ? (
-              <ListButton raised onClick={() => parent.signOut()}>
+              <ListButton raised onClick={() => signOut()}>
                 Sign Out
               </ListButton>
             ) : null}
@@ -35,9 +34,7 @@ export default ({ parent, show }) => {
           </BlockFooter>
           {signedIn ? (
             <List>
-              <ListButton onClick={() => parent.showLogin(false)}>
-                Cancel
-              </ListButton>
+              <ListButton onClick={() => showLogin(false)}>Cancel</ListButton>
             </List>
           ) : null}
         </Page>

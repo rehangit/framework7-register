@@ -22,3 +22,21 @@
 .inline-labels .item-label {
   width: 20%;
 }
+
+.sort-icon {
+  margin-left: 15px;
+  color: gray;
+}
+
+table.student-info {
+  border-collapse: collapse;
+  width: 100%;
+}
+table.student-info tr th,
+table.student-info tr td {
+  border: 1px dotted rgba(0, 0, 0, 0.2);
+  padding: 6px 10px;
+}
+table.student-info tr th {
+  text-align: left;
+}
