@@ -15,3 +15,17 @@ export const indexToLetter = (n) => {
 
 export const serialToDate = (serial) =>
   new Date((Math.floor(serial) - 25569) * 86400 * 1000);
+
+export const toJson = (table) => {
+  if (table.length < 1) return {};
+
+  const header = table[0];
+  return table.slice(1).reduce((acc, row, r) => {
+    const rowData = header.reduce((rec, key, c) => {
+      rec[key] = row[c];
+      return rec;
+    }, {});
+    if (rowData[header[0]]) acc.push(rowData);
+    return acc;
+  }, []);
+};

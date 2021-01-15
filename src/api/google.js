@@ -1,6 +1,6 @@
 import env from '../config/env.json';
 
-import {
+const {
   API_KEY,
   CLIENT_ID,
   DISCOVERY_DOCS,
@@ -8,21 +8,7 @@ import {
   ORIGIN,
   SPREADSHEET_ID_PROD,
   SPREADSHEET_ID_DEV,
-} from '../config/env.json';
-
-const toJson = (table) => {
-  if (table.length < 1) return {};
-
-  const header = table[0];
-  return table.slice(1).reduce((acc, row, r) => {
-    const rowData = header.reduce((rec, key, c) => {
-      rec[key] = row[c];
-      return rec;
-    }, {});
-    if (rowData[header[0]]) acc.push(rowData);
-    return acc;
-  }, []);
-};
+} = env;
 
 export const isProd = window.location.origin.includes(ORIGIN);
 const SPREADSHEET_ID = isProd ? SPREADSHEET_ID_PROD : SPREADSHEET_ID_DEV;
@@ -137,7 +123,11 @@ export const signOut = async (attempt = 0) => {
 };
 
 export const signIn = async () =>
+  gapi.auth2.getAuthInstance() &&
   gapi.auth2.getAuthInstance().signIn({ prompt: 'select_account' });
 
 export const isSignedIn = async () =>
+  gapi &&
+  gapi.auth2 &&
+  gapi.auth2.getAuthInstance() &&
   gapi.auth2.getAuthInstance().isSignedIn.get();

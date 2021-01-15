@@ -13,7 +13,7 @@ import {
   List,
 } from 'framework7-react';
 
-export default ({ name, signIn, signOut, signedIn, show }) => {
+export default ({ name, signIn, signOut, signedIn, show, setShow }) => {
   return (
     <LoginScreen opened={show} className="the-login-screen">
       <View>
@@ -34,7 +34,7 @@ export default ({ name, signIn, signOut, signedIn, show }) => {
           </BlockFooter>
           {signedIn ? (
             <List>
-              <ListButton onClick={() => showLogin(false)}>Cancel</ListButton>
+              <ListButton onClick={() => setShow(false)}>Cancel</ListButton>
             </List>
           ) : null}
         </Page>

@@ -7,12 +7,11 @@
   min-width: 30%;
 }
 
-.loader {
-  display: block;
-  position: fixed;
-  top: 40%;
-  left: 45%;
-  z-index: 100;
+.button-bar.toolbar-transitioning {
+  display: none;
+}
+
+.preloader-backdrop {
 }
 
 .settings {

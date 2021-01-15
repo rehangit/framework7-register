@@ -1,7 +1,7 @@
 import React from 'react';
 import 'framework7-icons';
 
-import { serialToDate } from '../utils';
+import { serialToDate } from '../js/utils';
 
 import { Page, Block, Navbar, Popup, NavRight, Link } from 'framework7-react';
 

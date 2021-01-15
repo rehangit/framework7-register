@@ -15,12 +15,12 @@ import {
   Link,
   f7,
   Block,
-  Preloader,
   Tab,
   Tabs,
+  useStore,
 } from 'framework7-react';
 
-import StateGroupButtons from '../components/state-group';
+import StateGroupButtons from './state-group';
 
 export default ({
   type,
@@ -30,10 +30,10 @@ export default ({
   onChange,
   selectedStudents,
   selectedSection,
-  waiting,
   onStudentInfo,
 }) => {
   const [sortAsc, setSortAsc] = React.useState(true);
+  const waiting = useStore('loading');
   const sortFn = sortAsc
     ? (a, b) => (a.name < b.name ? -1 : 1)
     : (a, b) => (a.name > b.name ? -1 : 1);

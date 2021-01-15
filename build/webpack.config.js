@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -17,6 +18,7 @@ const target = process.env.TARGET || 'web';
 
 module.exports = {
   mode: env,
+  target: env === 'development' ? 'web' : 'browserslist',
   entry: {
     app: './src/index.js',
   },
@@ -42,33 +44,26 @@ module.exports = {
     contentBase: '/www/',
     disableHostCheck: true,
     historyApiFallback: true,
-    watchOptions: {
-      poll: 1000,
-    },
-    host: 'localhost',
-    port: 8080,
   },
   optimization: {
-    minimizer: [
-      new TerserPlugin({
-        sourceMap: true,
-      }),
-    ],
+    concatenateModules: true,
+    minimizer: [new TerserPlugin()],
   },
   module: {
     rules: [
       {
         test: /\.(mjs|js|jsx)$/,
-        use: 'babel-loader',
-        include: [
-          resolvePath('src'),
-          resolvePath('node_modules/framework7'),
-
-          resolvePath('node_modules/framework7-react'),
-
-          resolvePath('node_modules/template7'),
-          resolvePath('node_modules/dom7'),
-          resolvePath('node_modules/ssr-window'),
+        include: [resolvePath('src')],
+        use: [
+          {
+            loader: require.resolve('babel-loader'),
+            options:
+              env === 'development'
+                ? {
+                    plugins: [require.resolve('react-refresh/babel')],
+                  }
+                : {},
+          },
         ],
       },
 
@@ -175,12 +170,11 @@ module.exports = {
               map: { inline: false },
             },
           }),
-          new webpack.optimize.ModuleConcatenationPlugin(),
         ]
       : [
           // Development only plugins
           new webpack.HotModuleReplacementPlugin(),
-          new webpack.NamedModulesPlugin(),
+          new ReactRefreshWebpackPlugin(),
         ]),
     new HtmlWebpackPlugin({
       filename: './index.html',
@@ -201,11 +195,14 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: 'css/[name].css',
     }),
-    new CopyWebpackPlugin([
-      {
-        from: resolvePath('src/static'),
-        to: resolvePath('www/static'),
-      },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          noErrorOnMissing: true,
+          from: resolvePath('src/static'),
+          to: resolvePath('www/static'),
+        },
+      ],
+    }),
   ],
 };

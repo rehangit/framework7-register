@@ -1,35 +1,41 @@
-import React from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  createRef,
+} from 'react';
 import 'framework7-icons';
 
 import '../css/main.css';
 
 import {
-  Page,
-  Navbar,
-  ListItem,
+  Block,
+  BlockTitle,
+  Button,
+  f7,
+  Icon,
+  Link,
   List,
   ListInput,
-  Icon,
-  Button,
-  Toolbar,
-  Link,
-  f7,
-  Block,
-  Preloader,
+  ListItem,
+  Navbar,
+  NavLeft,
+  NavTitle,
+  Page,
+  Popover,
+  Popup,
   Tab,
   Tabs,
-  Popup,
-  Popover,
-  BlockTitle,
+  Toolbar,
   View,
 } from 'framework7-react';
+import { useStore } from 'framework7-react';
 
-import { SignInProfile } from '../components/profile';
-
-import ScoreTab from './ScoreTab';
+import store from '../js/store';
+import ScoreTab from '../components/score-tab.jsx';
 import StudentInfo from './popup';
-import ErrorPage from './error';
-import * as google from '../data/googleApi';
+import * as google from '../api/google';
 
 const calendarParams = {
   header: true,
@@ -41,119 +47,72 @@ const calendarParams = {
   backdrop: true,
 };
 
-import { dateToSerial, indexToLetter } from '../utils';
+import { dateToSerial, indexToLetter } from '../js/utils';
+import { getHeaders, getData, saveData } from '../js/data';
 
-const getHeaders = async (scoreType) => {
-  console.log('getHeaders', scoreType);
+export default () => {
+  const [scoreHeaders, setScoreHeaders] = useState({});
+  const [students, setStudents] = useState([]);
+  const [dates, setDates] = useState([]);
 
-  if (!(await google.isSignedIn())) return {};
+  const [sections, setSections] = useState([]);
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [scoreType, setScoreType] = useState('Attendance');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedSection, setSelectedSection] = useState();
 
-  const { rows, columns: dates } = await google.getSheetHeaders(
-    scoreType,
-    1,
-    3
-  );
-  const names = rows.map(([id, name, section]) => ({
-    id,
-    name,
-    section,
-  }));
-  console.log('getHeaders', scoreType, { names, dates });
-  return { names, dates };
-};
+  const setLoading = (value) =>
+    value ? store.dispatch('startLoading') : store.dispatch('endLoading');
 
-const saveData = async ({ scoreType, values }) => {
-  if (!scoreType) return;
-  if (!(await google.isSignedIn())) return;
+  const [popupOpened, setPopupOpened] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState('');
+  const [userData, setUserData] = useState([]);
 
-  const rangesAndValues =
-    (values &&
-      values.map(({ ri, ci, value }) => {
-        const col = indexToLetter(ci);
-        const row = ri + 2;
-        const range = `${scoreType}!${col}${row}`;
-        return [range, value];
-      })) ||
-    [];
-  console.log('saveData', { rangesAndValues });
-  return google.saveData(rangesAndValues);
-};
-
-const getData = async ({ scoreType, indices }) => {
-  console.log('getData', { scoreType, indices });
-  if (!(await google.isSignedIn())) return [];
-
-  const ranges = indices.map(([ri, ci]) => {
-    const col = indexToLetter(ci);
-    return `${scoreType}!${col}${2 + ri}`;
-  });
-
-  console.log('getData', { ranges });
-
-  const colData = await google.getSheetData(ranges);
-  console.log('getData', { colData, indices });
-
-  const data = indices.map(([ri], i) => ({
-    index: ri,
-    value: colData && colData[i] && colData[i][0][0],
-  }));
-  console.log('getData', { data });
-  return data;
-};
-
-export default ({ user, onProfile }) => {
-  const [scoreHeaders, setScoreHeaders] = React.useState({});
-  const [students, setStudents] = React.useState([]);
-  const [dates, setDates] = React.useState([]);
-
-  const [sections, setSections] = React.useState([]);
-  const [selectedStudents, setSelectedStudents] = React.useState([]);
-  const [scoreType, setScoreType] = React.useState('Attendance');
-  const [selectedDate, setSelectedDate] = React.useState(new Date());
-  const [selectedSection, setSelectedSection] = React.useState();
-
-  const [waiting, setWaiting] = React.useState(false);
-
-  const [popupOpened, setPopupOpened] = React.useState(false);
-  const [selectedStudent, setSelectedStudent] = React.useState('');
-  const [userData, setUserData] = React.useState([]);
-  const [error, setError] = React.useState(null);
+  const user = useStore('user');
 
   const onStudentInfo = (info) => {
     setPopupOpened(true);
     setSelectedStudent(students.find((s) => s.name === info.name));
   };
 
-  React.useEffect(() => {
-    setWaiting(true);
-    const getAllHeaders = async () => {
-      return Promise.all([
-        getHeaders('Attendance'),
-        getHeaders('Behaviour'),
-        getHeaders('Learning'),
-        getHeaders('source'),
-      ]);
-    };
+  useEffect(() => {
+    if (user) {
+      setLoading(true);
+      const getAllHeaders = async () => {
+        return Promise.all([
+          getHeaders('Attendance'),
+          getHeaders('Behaviour'),
+          getHeaders('Learning'),
+          getHeaders('source'),
+        ]);
+      };
 
-    getAllHeaders().then(([a, b, l, s]) => {
-      console.log('getAllHeaders', [a, b, l, s]);
-      setScoreHeaders({ Attendance: a, Behaviour: b, Learning: l, Source: s });
-      setScoreType('Attendance');
-      setWaiting(false);
-    });
+      getAllHeaders().then(([a, b, l, s]) => {
+        console.log('getAllHeaders', [a, b, l, s]);
+        setScoreHeaders({
+          Attendance: a,
+          Behaviour: b,
+          Learning: l,
+          Source: s,
+        });
+        setScoreType('Attendance');
+        setLoading(false);
+      });
+    }
   }, [user]);
+  console.log('Main > user', user);
 
-  React.useEffect(() => {
-    setWaiting(true);
+  useEffect(() => {
+    setLoading(true);
 
     if (scoreHeaders && scoreHeaders[scoreType]) {
       setStudents(scoreHeaders[scoreType].names);
       setDates(scoreHeaders[scoreType].dates);
     }
-    setWaiting(false);
+    setLoading(false);
   }, [scoreType, scoreHeaders]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!students || !students.length) return;
     const sectionsSet = students.reduce((acc, { section }) => {
       acc.add(section);
@@ -161,7 +120,7 @@ export default ({ user, onProfile }) => {
     }, new Set());
 
     const newSections = Array.from(sectionsSet).filter(Boolean).sort();
-    console.log('React.useEffect [students]', { selectedSection, newSections });
+    console.log('useEffect [students]', { selectedSection, newSections });
     setSections(newSections);
 
     if (!selectedSection) {
@@ -176,15 +135,15 @@ export default ({ user, onProfile }) => {
       }
     }
 
-    console.log('React.useEffect [students]', { students, newSections });
+    console.log('useEffect [students]', { students, newSections });
   }, [students]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedSection && sections.includes(selectedSection))
       window.localStorage.setItem('selectedSection', selectedSection);
   }, [selectedSection]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('Getting student data again', {
       selectedDate,
       selectedSection,
@@ -194,7 +153,7 @@ export default ({ user, onProfile }) => {
     });
 
     if (!dates || !students || !selectedSection) return;
-    setWaiting(true);
+    setLoading(true);
 
     const serial = dateToSerial(selectedDate);
     const col = dates.findIndex((d) => d === serial);
@@ -225,17 +184,17 @@ export default ({ user, onProfile }) => {
             dates,
           },
         });
-        setWaiting(false);
+        setLoading(false);
       })
       .catch((err) => {
-        setError(err);
-        setWaiting(false);
+        store.dispatch('setError', err);
+        setLoading(false);
       });
   }, [selectedDate, selectedSection, scoreType, students, dates]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!scoreHeaders || !selectedStudent) return;
-    setWaiting(true);
+    setLoading(true);
     const rowIndex = scoreHeaders.Source.names.findIndex(
       (s) => s.id === selectedStudent.id
     );
@@ -247,21 +206,23 @@ export default ({ user, onProfile }) => {
         data,
       });
       setUserData([scoreHeaders.Source.dates, data.map((d) => d.value)]);
-      setWaiting(false);
+      setLoading(false);
     });
   }, [selectedStudent, scoreHeaders]);
 
-  const modified = React.useMemo(() => {
-    console.log('modified memo');
+  const modified = useMemo(() => {
+    console.log('useMemo called for calculating modified', {
+      selectedStudents,
+    });
     const mods = selectedStudents.reduce(
       (acc, { value, orig }) => acc || value !== orig,
       false
     );
-    console.log('onChange', { mods });
+    console.log('useMemo calculated mods:', mods);
     return mods;
   }, [selectedStudents]);
 
-  const onChange = React.useCallback(
+  const onChange = useCallback(
     (value, name) => {
       console.log('main.jsx > onChange', value, name, selectedSection);
       if (name) {
@@ -279,9 +240,9 @@ export default ({ user, onProfile }) => {
     [selectedStudents, selectedSection]
   );
 
-  const onSave = React.useCallback(() => {
+  const onSave = useCallback(() => {
     if (!modified) return;
-    setWaiting(true);
+    setLoading(true);
     const serial = dateToSerial(selectedDate);
     const colIndex = dates.findIndex((d) => d === serial);
     const values = selectedStudents.reduce((acc, { index, value, orig }) => {
@@ -299,7 +260,7 @@ export default ({ user, onProfile }) => {
             return s;
           })
         );
-        setWaiting(false);
+        setLoading(false);
       })
       .catch((err) => {
         console.error(
@@ -307,110 +268,97 @@ export default ({ user, onProfile }) => {
           { scoreType, selectedDate, values },
           err
         );
-        setError(err);
-        setWaiting(false);
+        store.dispatch('setError', err);
+        setLoading(false);
       });
   }, [selectedDate, selectedStudents, modified]);
 
-  const onCancel = React.useCallback(() => {
+  const onCancel = useCallback(() => {
     selectedStudents.forEach((s, i) => {
       selectedStudents[i].value = s.orig;
     });
     setSelectedStudents(selectedStudents.slice());
   }, [selectedStudents]);
 
-  const name = (f7 && f7.params.name) || '';
-
   return (
-    <View>
-      <Page>
-        <Navbar title={name} innerClass="navbar-inner-spacing">
-          <SignInProfile
-            user={user}
-            onClick={() => {
-              console.log('trying to open login screen');
-              onProfile(true);
-            }}
-          />
-        </Navbar>
-        <List inlineLabels className="settings">
-          <ListInput
-            type="datepicker"
-            label="Date"
-            value={[selectedDate]}
-            calendarParams={calendarParams}
-            outline
-            disabled={modified}
-            onCalendarChange={([newDate]) => setSelectedDate(newDate)}
-          />
-          <ListInput
-            type="select"
-            label="Class"
-            value={selectedSection}
-            outline
-            onChange={(e) => setSelectedSection(e.target.value)}
-            disabled={modified}
-          >
-            {sections.map((name) => (
-              <option value={name} key={name}>
-                {name}
-              </option>
-            ))}
-          </ListInput>
-        </List>
-        <Toolbar hidden={modified} tabbar bottom>
-          <Link tabLink="#Attendance">Attendance</Link>
-          <Link tabLink="#Behaviour">Behaviour</Link>
-          <Link tabLink="#Learning">Learning</Link>
-        </Toolbar>
-        <Tabs>
-          {[
-            ['Attendance', 'PLA'],
-            ['Behaviour', '01234'],
-            ['Learning', '01234'],
-          ].map(([type, labels]) => (
-            <ScoreTab
-              key={type}
-              type={type}
-              scoreType={scoreType}
-              scoreLabels={labels}
-              setScoreType={setScoreType}
-              onChange={onChange}
-              selectedStudents={selectedStudents}
-              selectedSection={selectedSection}
-              waiting={waiting}
-              onStudentInfo={onStudentInfo}
-            />
+    <Page name="students">
+      <Navbar innerClass="navbar-inner-spacing">
+        <NavLeft>
+          <Link iconF7="bars" panelOpen="left" />
+          <NavTitle>Students</NavTitle>
+        </NavLeft>
+      </Navbar>
+      <Toolbar hidden={modified} tabbar bottom>
+        <Link tabLink="#Attendance">Attendance</Link>
+        <Link tabLink="#Behaviour">Behaviour</Link>
+        <Link tabLink="#Learning">Learning</Link>
+      </Toolbar>
+      <Toolbar className="button-bar" tabbar hidden={!modified} bottom>
+        <Button raised fill color="red" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button raised fill color="green" onClick={onSave}>
+          Save
+        </Button>
+      </Toolbar>
+      <List inlineLabels className="settings">
+        <ListInput
+          type="datepicker"
+          label="Date"
+          value={[selectedDate]}
+          calendarParams={calendarParams}
+          outline
+          disabled={modified}
+          onCalendarChange={([newDate]) => setSelectedDate(newDate)}
+        />
+        <ListInput
+          type="select"
+          label="Class"
+          value={selectedSection}
+          outline
+          onChange={(e) => setSelectedSection(e.target.value)}
+          disabled={modified}
+        >
+          {sections.map((name) => (
+            <option value={name} key={name}>
+              {name}
+            </option>
           ))}
-        </Tabs>
+        </ListInput>
+      </List>
+      <Tabs>
+        {[
+          ['Attendance', 'PLA'],
+          ['Behaviour', '01234'],
+          ['Learning', '01234'],
+        ].map(([type, labels]) => (
+          <ScoreTab
+            key={type}
+            type={type}
+            scoreType={scoreType}
+            scoreLabels={labels}
+            setScoreType={setScoreType}
+            onChange={onChange}
+            selectedStudents={selectedStudents}
+            selectedSection={selectedSection}
+            onStudentInfo={onStudentInfo}
+          />
+        ))}
+      </Tabs>
 
-        <StudentInfo
-          opened={popupOpened}
-          onOpened={(val) => {
-            if (!val) {
-              console.log('closing thepop up and set user data to empty array');
-              setPopupOpened(false);
-              setImmediate(() => {
-                setUserData([[]]);
-              });
-            }
-          }}
-          student={userData}
-        />
-        <Toolbar className="button-bar" hidden={!modified} bottom>
-          <Button raised fill color="red" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button raised fill color="green" onClick={onSave}>
-            Save
-          </Button>
-        </Toolbar>
-        <ErrorPage error={error} setError={setError} />
-        <Preloader
-          className="loader"
-          style={{ display: waiting ? 'block' : 'none' }}
-        />
-      </Page>
-    </View>
+      <StudentInfo
+        opened={popupOpened}
+        onOpened={(val) => {
+          if (!val) {
+            console.log('closing thepop up and set user data to empty array');
+            setPopupOpened(false);
+            setImmediate(() => {
+              setUserData([[]]);
+            });
+          }
+        }}
+        student={userData}
+      />
+    </Page>
   );
 };
