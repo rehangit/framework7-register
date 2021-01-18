@@ -1,4 +1,6 @@
 import env from '../config/env.json';
+import { logger } from '../js/utils';
+const { log } = logger('google');
 
 const {
   API_KEY,
@@ -12,7 +14,7 @@ const {
 
 export const isProd = window.location.origin.includes(ORIGIN);
 const SPREADSHEET_ID = isProd ? SPREADSHEET_ID_PROD : SPREADSHEET_ID_DEV;
-console.log({ isProd, SPREADSHEET_ID });
+log({ isProd, SPREADSHEET_ID });
 
 const setMultiple = (rangesAndValues) => {
   const data = rangesAndValues.map(([range, value]) => ({
@@ -24,13 +26,13 @@ const setMultiple = (rangesAndValues) => {
     spreadsheetId: SPREADSHEET_ID,
     resource: { data, valueInputOption: 'USER_ENTERED' },
   };
-  console.log('setMultiple', { data });
-  console.log('setMultiple params', batchParams);
+  log('setMultiple', { data });
+  log('setMultiple params', batchParams);
   return gapi.client.sheets.spreadsheets.values
     .batchUpdate(batchParams)
     .then((response) => {
       var result = response.result;
-      console.log(
+      log(
         `setMultiple batchUpdate ${result.totalUpdatedCells} cells updated.`,
         result
       );
@@ -38,19 +40,19 @@ const setMultiple = (rangesAndValues) => {
 };
 
 const getMultipleRanges = async (ranges) => {
-  console.log('>getMultipleRanges', ranges);
+  log('>getMultipleRanges', ranges);
   const batchParams = {
     spreadsheetId: SPREADSHEET_ID,
     ranges,
     valueRenderOption: 'UNFORMATTED_VALUE',
   };
-  console.log('getMultipleRanges batchParams', batchParams);
+  log('getMultipleRanges batchParams', batchParams);
 
   return gapi.client.sheets.spreadsheets.values
     .batchGet(batchParams)
     .then((response) => {
       var result = response.result;
-      console.log(
+      log(
         `getMultipleRanges batchGet ${result.valueRanges.length} ranges retrieved: `,
         {
           ranges,
@@ -58,7 +60,7 @@ const getMultipleRanges = async (ranges) => {
         }
       );
       const values = result.valueRanges.map(({ values }) => values);
-      console.log('getMultipleRanges return values', { values });
+      log('getMultipleRanges return values', { values });
       return values;
     })
     .catch(() => []);
@@ -90,14 +92,15 @@ export const getUserProfile = async () => {
       const image = profile.getImageUrl();
       return { name, email, image };
     }
+    log('not signedIn yet or the status unknown', gapi);
   } catch (err) {
-    console.log('Update User error:', { err });
+    log('Update User error:', { err });
   }
 };
 
 export const onGapiAvailable = async () => {
   const g = gapi || window.gapi;
-  console.log('ONGAPIAVALABLE', g, g.client);
+  log('ONGAPIAVALABLE', g, g && g.client);
   if (g && g.client && g.client.init)
     return g.client.init({
       apiKey: API_KEY,
@@ -108,11 +111,11 @@ export const onGapiAvailable = async () => {
 };
 
 export const signOut = async (attempt = 0) => {
-  console.log('>signOut', attempt);
+  log('>signOut', attempt);
   const g = gapi || window.gapi;
   const params = await g.auth2.getAuthInstance().signOut();
   const signedIn = await g.auth2.getAuthInstance().isSignedIn.get();
-  console.log('>signOut', { signedIn, params });
+  log('>signOut', { signedIn, params });
   if (signedIn && attempt < 3) {
     setTimeout(() => signOut(++attempt), 1000);
     return;
@@ -122,12 +125,12 @@ export const signOut = async (attempt = 0) => {
   current.reloadAuthResponse();
 };
 
-export const signIn = async () =>
+export const signInWithPrompt = async () =>
   gapi.auth2.getAuthInstance() &&
-  gapi.auth2.getAuthInstance().signIn({ prompt: 'select_account' });
+  gapi.auth2.getAuthInstance().signIn({ prompt: 'consent' });
 
-export const isSignedIn = async () =>
-  gapi &&
-  gapi.auth2 &&
+export const isLoggedIn = async () =>
+  !!gapi &&
+  !!gapi.auth2 &&
   gapi.auth2.getAuthInstance() &&
   gapi.auth2.getAuthInstance().isSignedIn.get();

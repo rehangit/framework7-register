@@ -49,8 +49,10 @@ const calendarParams = {
 
 import { dateToSerial, indexToLetter } from '../js/utils';
 import { getHeaders, getData, saveData } from '../js/data';
+import { logger } from '../js/utils';
+const { log } = logger('main');
 
-export default () => {
+export default ({}) => {
   const [scoreHeaders, setScoreHeaders] = useState({});
   const [students, setStudents] = useState([]);
   const [dates, setDates] = useState([]);
@@ -68,7 +70,8 @@ export default () => {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [userData, setUserData] = useState([]);
 
-  const user = useStore('user');
+  const userVersion = useStore('userVersion');
+  const user = useMemo(() => store.getters.user.value, [userVersion]);
 
   const onStudentInfo = (info) => {
     setPopupOpened(true);
@@ -76,31 +79,29 @@ export default () => {
   };
 
   useEffect(() => {
-    if (user) {
-      setLoading(true);
-      const getAllHeaders = async () => {
-        return Promise.all([
-          getHeaders('Attendance'),
-          getHeaders('Behaviour'),
-          getHeaders('Learning'),
-          getHeaders('source'),
-        ]);
-      };
+    log('useEffect [] user', user);
+    setLoading(true);
+    const getAllHeaders = async () => {
+      return Promise.all([
+        getHeaders('Attendance'),
+        getHeaders('Behaviour'),
+        getHeaders('Learning'),
+        getHeaders('source'),
+      ]);
+    };
 
-      getAllHeaders().then(([a, b, l, s]) => {
-        console.log('getAllHeaders', [a, b, l, s]);
-        setScoreHeaders({
-          Attendance: a,
-          Behaviour: b,
-          Learning: l,
-          Source: s,
-        });
-        setScoreType('Attendance');
-        setLoading(false);
+    getAllHeaders().then(([a, b, l, s]) => {
+      log('getAllHeaders', [a, b, l, s]);
+      setScoreHeaders({
+        Attendance: a,
+        Behaviour: b,
+        Learning: l,
+        Source: s,
       });
-    }
+      setScoreType('Attendance');
+      setLoading(false);
+    });
   }, [user]);
-  console.log('Main > user', user);
 
   useEffect(() => {
     setLoading(true);
@@ -120,14 +121,14 @@ export default () => {
     }, new Set());
 
     const newSections = Array.from(sectionsSet).filter(Boolean).sort();
-    console.log('useEffect [students]', { selectedSection, newSections });
+    log('useEffect [students]', { selectedSection, newSections });
     setSections(newSections);
 
     if (!selectedSection) {
       const storedSelectedSection = window.localStorage.getItem(
         'selectedSection'
       );
-      console.log({ storedSelectedSection });
+      log({ storedSelectedSection });
       if (storedSelectedSection && newSections.includes(storedSelectedSection))
         setSelectedSection(storedSelectedSection);
       else {
@@ -135,7 +136,7 @@ export default () => {
       }
     }
 
-    console.log('useEffect [students]', { students, newSections });
+    log('useEffect [students]', { students, newSections });
   }, [students]);
 
   useEffect(() => {
@@ -144,7 +145,7 @@ export default () => {
   }, [selectedSection]);
 
   useEffect(() => {
-    console.log('Getting student data again', {
+    log('Getting student data again', {
       selectedDate,
       selectedSection,
       scoreType,
@@ -175,7 +176,7 @@ export default () => {
           }))
           .sort((a, b) => (a.name < b.name ? -1 : 1));
         setSelectedStudents(sorted);
-        console.log('getData called', {
+        log('getData called', {
           input: {
             selectedDate,
             selectedSection,
@@ -200,7 +201,7 @@ export default () => {
     );
     const ranges = scoreHeaders.Source.dates.map((_, c) => [rowIndex, c]);
     getData({ scoreType: 'source', indices: ranges }).then((data) => {
-      console.log('Received student data from source', {
+      log('Received student data from source', {
         rowIndex,
         ranges,
         data,
@@ -211,20 +212,20 @@ export default () => {
   }, [selectedStudent, scoreHeaders]);
 
   const modified = useMemo(() => {
-    console.log('useMemo called for calculating modified', {
+    log('useMemo called for calculating modified', {
       selectedStudents,
     });
     const mods = selectedStudents.reduce(
       (acc, { value, orig }) => acc || value !== orig,
       false
     );
-    console.log('useMemo calculated mods:', mods);
+    log('useMemo calculated mods:', mods);
     return mods;
   }, [selectedStudents]);
 
   const onChange = useCallback(
     (value, name) => {
-      console.log('main.jsx > onChange', value, name, selectedSection);
+      log('main.jsx > onChange', value, name, selectedSection);
       if (name) {
         const index = selectedStudents.findIndex((s) => s.name === name);
         selectedStudents[index].value = value;
@@ -251,7 +252,7 @@ export default () => {
       }
       return acc;
     }, []);
-    console.log('saving data:', { scoreType, date: selectedDate, values });
+    log('saving data:', { scoreType, date: selectedDate, values });
     saveData({ scoreType, values })
       .then(() => {
         setSelectedStudents(
@@ -350,7 +351,7 @@ export default () => {
         opened={popupOpened}
         onOpened={(val) => {
           if (!val) {
-            console.log('closing thepop up and set user data to empty array');
+            log('closing thepop up and set user data to empty array');
             setPopupOpened(false);
             setImmediate(() => {
               setUserData([[]]);

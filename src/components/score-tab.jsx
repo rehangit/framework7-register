@@ -33,7 +33,6 @@ export default ({
   onStudentInfo,
 }) => {
   const [sortAsc, setSortAsc] = React.useState(true);
-  const waiting = useStore('loading');
   const sortFn = sortAsc
     ? (a, b) => (a.name < b.name ? -1 : 1)
     : (a, b) => (a.name > b.name ? -1 : 1);
@@ -43,7 +42,7 @@ export default ({
       onTabShow={({ id }) => setScoreType(id)}
       tabActive={scoreType === type}
     >
-      <List style={{ pointerEvents: waiting ? 'none' : 'initial' }}>
+      <List>
         <ListItem className="header">
           <div slot="title" onClick={() => setSortAsc(!sortAsc)}>
             <span>Name</span>

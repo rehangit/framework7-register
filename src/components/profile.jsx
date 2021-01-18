@@ -1,21 +1,31 @@
 import React from 'react';
-import { Link, f7, theme, Block } from 'framework7-react';
+import {
+  useStore,
+  Card,
+  CardHeader,
+  CardFooter,
+  f7,
+  Link,
+  CardContent,
+} from 'framework7-react';
+import { logger } from '../js/utils';
+const { log } = logger('profile.jsx');
 
-import '../css/profile.css';
-
-export function SignInProfile({ user, onClick }) {
-  if (!f7 || !f7.params) return null;
-  const { navbar } = f7.params;
-  const showText = !theme.ios || !navbar.iosCenterTitle;
-  return (
-    <div className="user-profile" onClick={onClick}>
-      {showText ? (
-        <div className="text-block">
-          <div className="item-title">{user.name}</div>
-          <div className="item-subtitle">{user.email}</div>
-        </div>
-      ) : null}
-      <img src={user.image} />
-    </div>
-  );
+export function SignInProfile({}) {
+  const user = useStore('user');
+  return user && user.email ? (
+    <Card className="profile-card">
+      <CardContent className="no-border">
+        <Link loginScreenOpen="#the-login-screen" panelClose>
+          <div>
+            <img src={user.image} width="34" height="34" />
+          </div>
+          <div style={{ marginLeft: '12px' }}>
+            <div>{user.name}</div>
+            <div style={{ fontSize: 'smaller' }}>{user.email}</div>
+          </div>
+        </Link>
+      </CardContent>
+    </Card>
+  ) : null;
 }

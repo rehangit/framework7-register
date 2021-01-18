@@ -3,7 +3,6 @@ export const dateToSerial = (date) => {
   const serial = Math.floor(
     (startOfDay - new Date('1899-12-30')) / (1000 * 3600 * 24)
   );
-  console.log('Converting date to serial', { date, serial });
   return serial;
 };
 
@@ -28,4 +27,13 @@ export const toJson = (table) => {
     if (rowData[header[0]]) acc.push(rowData);
     return acc;
   }, []);
+};
+
+export const logger = (moduleName) => {
+  const _log = (...params) => {
+    console.log(`[${moduleName}]:`, ...params);
+  };
+  return {
+    log: (...args) => _log(...args),
+  };
 };

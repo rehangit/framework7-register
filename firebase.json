@@ -1,7 +1,6 @@
 {
   "hosting": {
     "public": "www",
-    "site": "registerapp-41098",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {

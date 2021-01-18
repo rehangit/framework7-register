@@ -1,32 +1,34 @@
 import { f7 } from 'framework7-react';
 import { createStore } from 'framework7/lite';
 import * as google from '../api/google';
+import { logger } from '../js/utils';
+const { log } = logger('store');
 
 const store = createStore({
   state: {
-    loading: false,
-    user: {},
+    loading: 0,
+    user: null,
     error: null,
+    userVersion: 0,
   },
   actions: {
-    updateUser({ state }) {
-      state.loading = true;
-      google.getUserProfile().then((user) => {
-        console.log('store updateUser', user);
-        state.user = user;
-        state.loading = false;
-      });
+    async updateUser({ state }) {
+      f7.preloader.show();
+      const user = await google.getUserProfile();
+      log('store updateUser', user);
+      state.user = user;
+      state.userVersion += 1;
+      f7.preloader.hide();
     },
     setError({ state }, error) {
       state.error = error;
     },
     startLoading({ state }) {
-      state.loading = true;
+      state.loading++;
       f7.preloader.show();
     },
     endLoading({ state }) {
-      state.loading = false;
-      f7.preloader.hide();
+      if (--state.loading <= 0) f7.preloader.hide();
     },
   },
   getters: {
@@ -35,6 +37,9 @@ const store = createStore({
     },
     user({ state }) {
       return state.user;
+    },
+    userVersion({ state }) {
+      return state.userVersion;
     },
     error({ state }) {
       return state.error;

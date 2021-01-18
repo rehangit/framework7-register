@@ -1,10 +1,13 @@
+import { logger } from '../js/utils';
+const { log } = logger('data');
+
 import * as google from '../api/google';
 import { indexToLetter } from '../js/utils';
 
 export const getHeaders = async (scoreType) => {
-  console.log('getHeaders', scoreType);
+  log('getHeaders >', scoreType);
 
-  if (!(await google.isSignedIn())) return {};
+  if (!(await google.isLoggedIn())) return {};
 
   const { rows = [], columns: dates = [] } = await google.getSheetHeaders(
     scoreType,
@@ -16,13 +19,13 @@ export const getHeaders = async (scoreType) => {
     name,
     section,
   }));
-  console.log('getHeaders', scoreType, { names, dates });
+  log('getHeaders <', scoreType, { names, dates });
   return { names, dates };
 };
 
 export const saveData = async ({ scoreType, values }) => {
   if (!scoreType) return;
-  if (!(await google.isSignedIn())) return;
+  if (!(await google.isLoggedIn())) return;
 
   const rangesAndValues =
     (values &&
@@ -33,28 +36,28 @@ export const saveData = async ({ scoreType, values }) => {
         return [range, value];
       })) ||
     [];
-  console.log('saveData', { rangesAndValues });
+  log('saveData', { rangesAndValues });
   return google.saveData(rangesAndValues);
 };
 
 export const getData = async ({ scoreType, indices }) => {
-  console.log('getData', { scoreType, indices });
-  if (!(await google.isSignedIn())) return [];
+  log('getData', { scoreType, indices });
+  if (!(await google.isLoggedIn())) return [];
 
   const ranges = indices.map(([ri, ci]) => {
     const col = indexToLetter(ci);
     return `${scoreType}!${col}${2 + ri}`;
   });
 
-  console.log('getData', { ranges });
+  log('getData', { ranges });
 
   const colData = await google.getSheetData(ranges);
-  console.log('getData', { colData, indices });
+  log('getData', { colData, indices });
 
   const data = indices.map(([ri], i) => ({
     index: ri,
     value: colData && colData[i] && colData[i][0][0],
   }));
-  console.log('getData', { data });
+  log('getData', { data });
   return data;
 };
