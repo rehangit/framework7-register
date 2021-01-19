@@ -4,6 +4,13 @@ import * as google from '../api/google';
 import { logger } from '../js/utils';
 const { log } = logger('store');
 
+const showLoader = (show) =>
+  f7 && f7.preloader
+    ? show
+      ? f7.preloader.show()
+      : f7.preloader.hide()
+    : null;
+
 const store = createStore({
   state: {
     loading: 0,
@@ -13,22 +20,22 @@ const store = createStore({
   },
   actions: {
     async updateUser({ state }) {
-      f7.preloader.show();
+      showLoader(true);
       const user = await google.getUserProfile();
       log('store updateUser', user);
       state.user = user;
       state.userVersion += 1;
-      f7.preloader.hide();
+      showLoader(false);
     },
     setError({ state }, error) {
       state.error = error;
     },
     startLoading({ state }) {
       state.loading++;
-      f7.preloader.show();
+      showLoader(true);
     },
     endLoading({ state }) {
-      if (--state.loading <= 0) f7.preloader.hide();
+      if (--state.loading <= 0) showLoader(false);
     },
   },
   getters: {

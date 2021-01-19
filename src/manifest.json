@@ -1,0 +1,22 @@
+{
+  "name": "Attendance Register",
+  "short_name": "Register",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fff",
+  "description": "Register for Students and Teacher Attendance",
+  "icons": [
+    {
+      "src": "static/images/manifest-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "static/images/manifest-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}

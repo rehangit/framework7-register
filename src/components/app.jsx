@@ -72,7 +72,7 @@ export default ({}) => {
           </List>
         </Panel>
 
-        <View main url="/students/" />
+        <View main url="/teachers/" />
         <MyLoginScreen />
         <ErrorPage />
       </App>
