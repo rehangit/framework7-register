@@ -1,0 +1,6 @@
+.tabs .tab-active li .item-title {
+  cursor: pointer;
+}
+.tabs .tab-active li.header .item-title {
+  text-transform: uppercase;
+}

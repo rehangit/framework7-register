@@ -1,10 +1,15 @@
 import MainPage from '../pages/main';
+import StudentsPage from '../pages/students';
 import TeachersPage from '../pages/teachers';
 
 const routes = [
   {
-    path: '/students/',
+    path: '/',
     component: MainPage,
+  },
+  {
+    path: '/students/',
+    component: StudentsPage,
   },
   {
     path: '/teachers/',

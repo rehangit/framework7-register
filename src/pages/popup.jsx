@@ -3,14 +3,34 @@ import 'framework7-icons';
 
 import { serialToDate } from '../js/utils';
 
-import { Page, Block, Navbar, Popup, NavRight, Link } from 'framework7-react';
+import {
+  Page,
+  Block,
+  Navbar,
+  Popup,
+  NavRight,
+  Link,
+  f7,
+} from 'framework7-react';
 
-export default ({ opened, onOpened, student }) => {
+export default ({ student, onClosed }) => {
+  const [opened, setOpened] = React.useState(false);
+  React.useEffect(() => {
+    if (student && student.length > 1) {
+      console.log('[popup] opening popup due to data received', { student });
+      f7.popup.open('.student-info-popup');
+    }
+  }, [student]);
   return (
-    (student && student.length > 1 && (
-      <Popup swipeToClose opened={opened} onPopupClosed={() => onOpened(false)}>
+    student &&
+    student.length > 1 && (
+      <Popup
+        swipeToClose
+        className="student-info-popup"
+        onPopupClosed={onClosed}
+      >
         <Page>
-          <Navbar title={student[1][1] + ' ' + student[1][2]}>
+          <Navbar title={`${student[1][1]} ${student[1][2]}`}>
             <NavRight>
               <Link popupClose>Close</Link>
             </NavRight>
@@ -43,7 +63,6 @@ export default ({ opened, onOpened, student }) => {
           </Block>
         </Page>
       </Popup>
-    )) ||
-    null
+    )
   );
 };

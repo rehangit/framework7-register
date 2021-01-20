@@ -8,10 +8,10 @@ import MainPage from '../pages/main';
 import TeachersCheckin from '../pages/teachers';
 import MyLoginScreen from '../pages/login';
 import ErrorPage from '../pages/error';
+import Menu from '../components/menu';
 
-import { SignInProfile } from '../components/profile';
-
-import * as google from '../api/google';
+import { isProd } from '../api/google-sheet';
+import { onGapiAvailable } from '../api/google-auth';
 
 import { version } from '../../package.json';
 
@@ -35,7 +35,7 @@ import {
 
 export default ({}) => {
   const f7params = {
-    name: 'Register' + (google.isProd ? '' : ' *'), // App name
+    name: 'Register' + (isProd ? '' : ' *'), // App name
     routes,
     store,
   };
@@ -45,8 +45,7 @@ export default ({}) => {
   useEffect(() => {
     const loadSignIn = () =>
       setTimeout(() => {
-        google
-          .onGapiAvailable()
+        onGapiAvailable()
           .then(() => {
             store.dispatch('updateUser');
             setLoaded(true);
@@ -59,20 +58,12 @@ export default ({}) => {
   }, [f7loaded]);
 
   useEffect(() => f7ready(() => setF7Loaded(true)), []);
-
+  log('rendering app', { loaded, f7params });
   return (
     loaded && (
       <App {...f7params}>
-        <Panel left cover>
-          <Navbar title={f7params.name} subtitle={f7params.version} />
-          <List>
-            <SignInProfile />
-            <ListItem link="/students/" title="Students" panelClose />
-            <ListItem link="/teachers/" title="Teacher's Checkin" panelClose />
-          </List>
-        </Panel>
-
-        <View main url="/teachers/" />
+        <Menu />
+        <View main url="/students/" />
         <MyLoginScreen />
         <ErrorPage />
       </App>

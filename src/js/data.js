@@ -1,15 +1,16 @@
 import { logger } from '../js/utils';
 const { log } = logger('data');
 
-import * as google from '../api/google';
+import * as gauth from '../api/google-auth';
+import * as gsheet from '../api/google-sheet';
 import { indexToLetter } from '../js/utils';
 
 export const getHeaders = async (scoreType) => {
   log('getHeaders >', scoreType);
 
-  if (!(await google.isLoggedIn())) return {};
+  if (!(await gauth.isLoggedIn())) return {};
 
-  const { rows = [], columns: dates = [] } = await google.getSheetHeaders(
+  const { rows = [], columns: dates = [] } = await gsheet.getSheetHeaders(
     scoreType,
     1,
     3
@@ -25,7 +26,7 @@ export const getHeaders = async (scoreType) => {
 
 export const saveData = async ({ scoreType, values }) => {
   if (!scoreType) return;
-  if (!(await google.isLoggedIn())) return;
+  if (!(await gauth.isLoggedIn())) return;
 
   const rangesAndValues =
     (values &&
@@ -37,12 +38,12 @@ export const saveData = async ({ scoreType, values }) => {
       })) ||
     [];
   log('saveData', { rangesAndValues });
-  return google.saveData(rangesAndValues);
+  return gsheet.saveSheetData(rangesAndValues);
 };
 
 export const getData = async ({ scoreType, indices }) => {
   log('getData', { scoreType, indices });
-  if (!(await google.isLoggedIn())) return [];
+  if (!(await gauth.isLoggedIn())) return [];
 
   const ranges = indices.map(([ri, ci]) => {
     const col = indexToLetter(ci);
@@ -51,7 +52,7 @@ export const getData = async ({ scoreType, indices }) => {
 
   log('getData', { ranges });
 
-  const colData = await google.getSheetData(ranges);
+  const colData = await gsheet.getSheetData(ranges);
   log('getData', { colData, indices });
 
   const data = indices.map(([ri], i) => ({

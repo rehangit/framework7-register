@@ -1,6 +1,6 @@
 import { f7 } from 'framework7-react';
 import { createStore } from 'framework7/lite';
-import * as google from '../api/google';
+import { getUserProfile } from '../api/google-auth';
 import { logger } from '../js/utils';
 const { log } = logger('store');
 
@@ -21,7 +21,7 @@ const store = createStore({
   actions: {
     async updateUser({ state }) {
       showLoader(true);
-      const user = await google.getUserProfile();
+      const user = await getUserProfile();
       log('store updateUser', user);
       state.user = user;
       state.userVersion += 1;

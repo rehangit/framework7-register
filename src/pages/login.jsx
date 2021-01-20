@@ -14,7 +14,7 @@ import {
   useStore,
 } from 'framework7-react';
 
-import * as google from '../api/google';
+import * as google from '../api/google-auth';
 import store from '../js/store';
 import { logger } from '../js/utils';
 const { log } = logger('login');

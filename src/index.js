@@ -23,8 +23,8 @@ Framework7.use(Framework7React);
 // Mount React App
 ReactDOM.render(React.createElement(App), document.getElementById('app'));
 
-const { VERSION = '1.0.0' } = process.env;
-
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register(`./static/sw-${VERSION}.js`);
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./static/sw.js');
+  });
 }

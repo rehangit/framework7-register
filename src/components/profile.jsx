@@ -1,19 +1,13 @@
 import React from 'react';
-import {
-  useStore,
-  Card,
-  CardHeader,
-  CardFooter,
-  f7,
-  Link,
-  CardContent,
-} from 'framework7-react';
+import { useStore, Card, f7, Link, CardContent } from 'framework7-react';
 import { logger } from '../js/utils';
+import store from '../js/store';
 const { log } = logger('profile.jsx');
 
-export function SignInProfile({}) {
-  const user = useStore('user');
-  return user && user.email ? (
+export default ({}) => {
+  const version = useStore('userVersion');
+  const user = React.useMemo(() => store.getters.user?.value || {}, [version]);
+  return (
     <Card className="profile-card">
       <CardContent className="no-border">
         <Link loginScreenOpen="#the-login-screen" panelClose>
@@ -27,5 +21,5 @@ export function SignInProfile({}) {
         </Link>
       </CardContent>
     </Card>
-  ) : null;
-}
+  );
+};

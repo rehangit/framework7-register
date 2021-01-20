@@ -1,7 +1,7 @@
 import React from 'react';
 import 'framework7-icons';
 
-import '../css/main.css';
+import '../css/score-tab.css';
 
 import {
   Page,

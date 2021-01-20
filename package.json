@@ -10,7 +10,8 @@
     "dev": "cross-env NODE_ENV=development webpack serve --config ./build/webpack.config.js",
     "build": "cross-env NODE_ENV=production node ./build/build.js",
     "postinstall": "cpy ./node_modules/framework7-icons/fonts/*.* ./src/fonts/",
-    "deploy": "npm run build && firebase deploy --only hosting"
+    "deploy": "npm run build && firebase deploy --only hosting",
+    "icons": "pwa-asset-generator assets-src/web-icon.png src/static/images --scrape false -f -r -i -m "
   },
   "browserslist": [
     "Android >= 7",
@@ -51,6 +52,7 @@
     "ora": "^5.2.0",
     "postcss-loader": "^4.1.0",
     "postcss-preset-env": "^6.7.0",
+    "pwa-asset-generator": "^4.1.1",
     "react-refresh": "^0.9.0",
     "rimraf": "^3.0.2",
     "style-loader": "^2.0.0",
