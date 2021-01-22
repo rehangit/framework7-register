@@ -31,6 +31,8 @@ import {
   ListItem,
   useStore,
   f7ready,
+  Fab,
+  Icon,
 } from 'framework7-react';
 
 export default ({}) => {
@@ -46,7 +48,8 @@ export default ({}) => {
     const loadSignIn = () =>
       setTimeout(() => {
         onGapiAvailable()
-          .then(() => {
+          .then((response) => {
+            log('gapi init response', response);
             store.dispatch('updateUser');
             setLoaded(true);
           })
@@ -57,15 +60,52 @@ export default ({}) => {
     addEventListener('gapi_available', loadSignIn);
   }, [f7loaded]);
 
+  const [showA2HS, setShowA2HS] = React.useState(false);
+
+  let deferredPrompt;
+  addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setShowA2HS(true);
+  });
+
+  const onA2HS = (e) => {
+    // hide our user interface that shows our A2HS button
+    setShowA2HS(false);
+    // Show the prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the A2HS prompt');
+      } else {
+        console.log('User dismissed the A2HS prompt');
+      }
+      deferredPrompt = null;
+    });
+  };
+
+  // addEventListener('load', (e) => {
+
   useEffect(() => f7ready(() => setF7Loaded(true)), []);
   log('rendering app', { loaded, f7params });
   return (
     loaded && (
       <App {...f7params}>
         <Menu />
-        <View main url="/students/" />
+        <View main url="/" />
         <MyLoginScreen />
         <ErrorPage />
+        {showA2HS ? (
+          <Fab
+            position="center-bottom"
+            slot="fixed"
+            text="Add To Home Screen"
+            color="blue"
+            className="add-button"
+            onClick={onA2HS}
+          />
+        ) : null}
       </App>
     )
   );

@@ -28,3 +28,10 @@
   border-radius: 4px;
   background: no-repeat center/80%, #eee;
 }
+
+.add-button {
+  z-index: 20000;
+  text-align: center;
+  bottom: 30px;
+  display: none;
+}

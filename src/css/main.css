@@ -1,3 +1,17 @@
+.home {
+  position: relative;
+}
+.home::after {
+  content: '';
+  background: url('../static/images/manifest-icon-512.png') center/contain
+    no-repeat;
+  opacity: 0.05;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
 .button-bar .toolbar-inner {
   padding-left: 5%;
   padding-right: 5%;

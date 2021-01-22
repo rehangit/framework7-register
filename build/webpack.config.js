@@ -199,8 +199,13 @@ module.exports = {
       patterns: [
         {
           noErrorOnMissing: true,
-          from: resolvePath('src/static'),
-          to: resolvePath('www/static'),
+          from: resolvePath('src/static/images'),
+          to: resolvePath('www/static/images'),
+        },
+        {
+          noErrorOnMissing: true,
+          from: resolvePath('src/static/sw.js'),
+          to: resolvePath('www/sw.js'),
         },
         {
           from: resolvePath('src/manifest.json'),

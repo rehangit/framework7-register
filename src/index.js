@@ -25,6 +25,9 @@ ReactDOM.render(React.createElement(App), document.getElementById('app'));
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./static/sw.js');
+    navigator.serviceWorker
+      .register('./sw.js', { scope: './' })
+      .then((res) => console.log('[serviceworker] installed successfully!'))
+      .catch(console.error);
   });
 }

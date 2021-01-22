@@ -2,15 +2,7 @@ import env from '../config/env.json';
 import { logger } from '../js/utils';
 const { log } = logger('google');
 
-const {
-  API_KEY,
-  CLIENT_ID,
-  DISCOVERY_DOCS,
-  SCOPES,
-  ORIGIN,
-  SPREADSHEET_ID_PROD,
-  SPREADSHEET_ID_DEV,
-} = env;
+const { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES } = env;
 
 export const getUserProfile = async () => {
   try {

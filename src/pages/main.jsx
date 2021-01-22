@@ -3,12 +3,14 @@ import 'framework7-icons';
 
 import '../css/main.css';
 
-import { Page } from 'framework7-react';
+import { Block, BlockHeader, Page } from 'framework7-react';
 import Nav from '../components/navbar';
+import Graphs from '../components/embeds';
 export default ({}) => {
   return (
-    <Page name="home">
+    <Page name="home" className="home">
       <Nav />
+      <BlockHeader>Dashboard</BlockHeader>
     </Page>
   );
 };
