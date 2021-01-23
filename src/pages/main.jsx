@@ -11,6 +11,7 @@ export default ({}) => {
     <Page name="home" className="home">
       <Nav />
       <BlockHeader>Dashboard</BlockHeader>
+      {/* <Graphs /> */}
     </Page>
   );
 };

@@ -1,9 +1,10 @@
 {
   "name": "Attendance Register",
   "short_name": "Register",
-  "start_url": ".",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#fff",
+  "theme_color": "#007aff",
   "description": "Register for Students and Teacher Attendance",
   "icons": [
     {

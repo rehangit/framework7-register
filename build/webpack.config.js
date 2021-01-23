@@ -204,7 +204,7 @@ module.exports = {
         },
         {
           noErrorOnMissing: true,
-          from: resolvePath('src/static/sw.js'),
+          from: resolvePath('src/sw.js'),
           to: resolvePath('www/sw.js'),
         },
         {

@@ -61,15 +61,23 @@ export default ({}) => {
   }, [f7loaded]);
 
   const [showA2HS, setShowA2HS] = React.useState(false);
+  const [deferredPrompt, setDeferredPrompt] = React.useState(null);
 
-  let deferredPrompt;
   addEventListener('beforeinstallprompt', (e) => {
+    console.log('RECEIVED beforeinstallprompt.');
     e.preventDefault();
-    deferredPrompt = e;
+    setDeferredPrompt(e);
     setShowA2HS(true);
   });
 
   const onA2HS = (e) => {
+    if (!deferredPrompt) {
+      console.error(
+        'Error onA2HS called without deferredPrompt',
+        deferredPrompt
+      );
+      return;
+    }
     // hide our user interface that shows our A2HS button
     setShowA2HS(false);
     // Show the prompt
@@ -81,7 +89,7 @@ export default ({}) => {
       } else {
         console.log('User dismissed the A2HS prompt');
       }
-      deferredPrompt = null;
+      setDeferredPrompt(null);
     });
   };
 
