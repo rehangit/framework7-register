@@ -4,8 +4,6 @@ import 'framework7-icons';
 import routes from '../js/routes';
 import store from '../js/store';
 
-import MainPage from '../pages/main';
-import TeachersCheckin from '../pages/teachers';
 import MyLoginScreen from '../pages/login';
 import ErrorPage from '../pages/error';
 import Menu from '../components/menu';
@@ -13,29 +11,14 @@ import Menu from '../components/menu';
 import { isProd } from '../api/google-sheet';
 import { onGapiAvailable } from '../api/google-auth';
 
-import { version } from '../../package.json';
-
 import '../css/app.css';
 
 import { logger } from '../js/utils';
 const { log } = logger('app');
 
-import {
-  App,
-  View,
-  Panel,
-  Navbar,
-  Block,
-  Page,
-  List,
-  ListItem,
-  useStore,
-  f7ready,
-  Fab,
-  Icon,
-} from 'framework7-react';
+import { App, View, f7ready, Fab } from 'framework7-react';
 
-export default ({}) => {
+const app = () => {
   const f7params = {
     name: 'Register' + (isProd ? '' : ' *'), // App name
     routes,
@@ -101,7 +84,7 @@ export default ({}) => {
     loaded && (
       <App {...f7params}>
         <Menu />
-        <View main url="/" />
+        <View main url="/students/" />
         <MyLoginScreen />
         <ErrorPage />
         {showA2HS ? (
@@ -118,3 +101,5 @@ export default ({}) => {
     )
   );
 };
+
+export default app;

@@ -27,7 +27,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('./sw.js', { scope: './' })
-      .then((res) => console.log('[serviceworker] installed successfully!'))
+      .then(() => console.log('[serviceworker] installed successfully!'))
       .catch(console.error);
   });
 }

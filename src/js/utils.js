@@ -19,7 +19,7 @@ export const toJson = (table) => {
   if (table.length < 1) return {};
 
   const header = table[0];
-  return table.slice(1).reduce((acc, row, r) => {
+  return table.slice(1).reduce((acc, row) => {
     const rowData = header.reduce((rec, key, c) => {
       rec[key] = row[c];
       return rec;

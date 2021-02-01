@@ -1,3 +1,4 @@
+/* global gapi */
 import env from '../config/env.json';
 import { logger } from '../js/utils';
 const { log } = logger('google');

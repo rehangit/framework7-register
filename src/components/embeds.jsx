@@ -1,5 +1,5 @@
 import React from 'react';
-export default () => {
+export default function Dashboard() {
   const ratio = window.document.body.clientWidth / 750;
 
   return (
@@ -24,7 +24,7 @@ export default () => {
           position: 'absolute',
           top: 0,
           right: 0,
-          transform: `scale(0.5)`,
+          transform: 'scale(0.5)',
           transformOrigin: 'top right',
         }}
       >
@@ -40,4 +40,4 @@ export default () => {
       </div>
     </div>
   );
-};
+}

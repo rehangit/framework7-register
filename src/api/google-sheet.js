@@ -1,3 +1,4 @@
+/* global gapi */
 import env from '../config/env.json';
 import { logger } from '../js/utils';
 const { log } = logger('google');
@@ -23,7 +24,7 @@ export const saveSheetData = (rangesAndValues) => {
   return gapi.client.sheets.spreadsheets.values
     .batchUpdate(batchParams)
     .then((response) => {
-      var result = response.result;
+      const result = response.result;
       log(
         `saveSheetData batchUpdate ${result.totalUpdatedCells} cells updated.`,
         result
@@ -67,4 +68,21 @@ export const getSheetHeaders = async (sheet, r = 1, c = 3) => {
   if (!result || !result.length) return [];
   const [rows, [columns]] = result;
   return { columns, rows };
+};
+
+export const appendSheetData = async (range, values) => {
+  const params = {
+    spreadsheetId: SPREADSHEET_ID,
+    range,
+    resource: { values: [values] },
+  };
+  log('appendSheetData params', params);
+  return gapi.client.sheets.spreadsheets.values
+    .append(params)
+    .then((response) => {
+      log(
+        `appendSheetData append updated:${response.result.totalUpdatedCells} cells.`,
+        response.result
+      );
+    });
 };
