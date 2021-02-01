@@ -45,14 +45,11 @@ export const getSheetData = async (ranges) => {
     .batchGet(batchParams)
     .then((response) => {
       var result = response.result;
-      log(
-        `getSheetData batchGet ${result.valueRanges.length} ranges retrieved: `,
-        {
-          ranges,
-          result,
-        }
-      );
-      const values = result.valueRanges.map(({ values }) => values);
+      log('getSheetData batchGet ranges retrieved: ', {
+        ranges,
+        result,
+      });
+      const values = result.valueRanges.map(({ values }) => values).flat(1);
       log('getSheetData return values', { values });
       return values;
     })

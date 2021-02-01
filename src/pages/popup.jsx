@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { propTypes } from 'react';
 import 'framework7-icons';
 
 import { serialToDate } from '../js/utils';
@@ -13,8 +13,7 @@ import {
   f7,
 } from 'framework7-react';
 
-export default ({ student, onClosed }) => {
-  const [opened, setOpened] = React.useState(false);
+const StudentInfo = ({ student, onClosed }) => {
   React.useEffect(() => {
     if (student && student.length > 1) {
       console.log('[popup] opening popup due to data received', { student });
@@ -66,3 +65,10 @@ export default ({ student, onClosed }) => {
     )
   );
 };
+
+StudentInfo.propTypes = {
+  student: propTypes.string.isRequired,
+  onClosed: propTypes.func,
+};
+
+export default StudentInfo;

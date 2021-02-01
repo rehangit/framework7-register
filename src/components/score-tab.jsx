@@ -3,26 +3,11 @@ import 'framework7-icons';
 
 import '../css/score-tab.css';
 
-import {
-  Page,
-  Navbar,
-  ListItem,
-  List,
-  ListInput,
-  Icon,
-  Button,
-  Toolbar,
-  Link,
-  f7,
-  Block,
-  Tab,
-  Tabs,
-  useStore,
-} from 'framework7-react';
+import { ListItem, List, Icon, Tab } from 'framework7-react';
 
 import StateGroupButtons from './state-group';
 
-export default ({
+export default function ScoreTab({
   type,
   scoreType,
   setScoreType,
@@ -31,7 +16,7 @@ export default ({
   selectedStudents,
   selectedSection,
   onStudentInfo,
-}) => {
+}) {
   const [sortAsc, setSortAsc] = React.useState(true);
   const sortFn = sortAsc
     ? (a, b) => (a.name < b.name ? -1 : 1)
@@ -62,32 +47,35 @@ export default ({
         {selectedStudents
           .sort(sortFn)
           .filter((s) => s.section === selectedSection)
-          .map(({ name, value, section, orig }) => (
-            <ListItem
-              key={name}
-              style={{ opacity: 1, transition: 'all 1s ease' }}
-            >
-              <div
-                className="title"
-                slot="title"
-                onClick={() => onStudentInfo({ name, section })}
+          .map(({ name, section, ...scores }) => {
+            const { value, orig } = (scores && scores[scoreType]) || {};
+            return (
+              <ListItem
+                key={name}
+                style={{ opacity: 1, transition: 'all 1s ease' }}
               >
-                <Icon
-                  f7="person"
-                  size="22"
-                  style={{ verticalAlign: 'baseline', marginRight: '8px' }}
+                <div
+                  className="title"
+                  slot="title"
+                  onClick={() => onStudentInfo({ name, section })}
+                >
+                  <Icon
+                    f7="person"
+                    size="22"
+                    style={{ verticalAlign: 'baseline', marginRight: '8px' }}
+                  />
+                  <span>{name}</span>
+                </div>
+                <StateGroupButtons
+                  labels={scoreLabels}
+                  value={value}
+                  isDirty={orig !== value}
+                  onChange={(value) => onChange(value, name)}
                 />
-                <span>{name}</span>
-              </div>
-              <StateGroupButtons
-                labels={scoreLabels}
-                value={value}
-                isDirty={orig !== value}
-                onChange={(value) => onChange(value, name)}
-              />
-            </ListItem>
-          ))}
+              </ListItem>
+            );
+          })}
       </List>
     </Tab>
   );
-};
+}
