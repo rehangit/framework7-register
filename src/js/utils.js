@@ -6,6 +6,12 @@ export const dateToSerial = (date) => {
   return serial;
 };
 
+export const timestampToSerial = (timestamp) => {
+  const startOfDay = new Date(new Date(timestamp).toISOString());
+  const serial = (startOfDay - new Date('1899-12-30')) / (1000 * 3600 * 24);
+  return serial;
+};
+
 export const indexToLetter = (n) => {
   const a = Math.floor(n / 26);
   if (a >= 0) return indexToLetter(a - 1) + String.fromCharCode(65 + (n % 26));
@@ -36,4 +42,8 @@ export const logger = (moduleName) => {
   return {
     log: (...args) => _log(...args),
   };
+};
+
+export const toCamelCase = (str) => {
+  return str[0].toLowerCase() + str.slice(1);
 };

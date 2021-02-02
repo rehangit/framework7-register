@@ -3,7 +3,7 @@ import { Segmented, Button } from 'framework7-react';
 
 import '../css/state-group.css';
 
-export default ({
+export default function StateGroup({
   labels,
   onChange,
   value,
@@ -11,7 +11,7 @@ export default ({
   header,
   isDirty,
   onClickName,
-}) => {
+}) {
   const classes = [
     'state-group',
     isDirty ? 'dirty' : '',
@@ -23,11 +23,17 @@ export default ({
         <Button
           key={i}
           active={(value !== undefined && value.toString() === label) || header}
-          onClick={() => onChange(label)}
+          onClick={() => {
+            const onchangeParam =
+              value !== undefined && value.toString() === label
+                ? undefined
+                : label;
+            onChange(onchangeParam);
+          }}
           className={`label-${label}`}
           text={label}
         />
       ))}
     </Segmented>
   );
-};
+}

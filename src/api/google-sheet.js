@@ -71,15 +71,20 @@ export const appendSheetData = async (range, values) => {
   const params = {
     spreadsheetId: SPREADSHEET_ID,
     range,
-    resource: { values: [values] },
+    valueInputOption: 'USER_ENTERED',
+    insertDataOption: 'INSERT_ROWS',
   };
-  log('appendSheetData params', params);
+
+  const valueRangeBody = {
+    range,
+    majorDimension: 'ROWS',
+    values: values,
+  };
+
+  log('appendSheetData params', params, valueRangeBody);
   return gapi.client.sheets.spreadsheets.values
-    .append(params)
+    .append(params, valueRangeBody)
     .then((response) => {
-      log(
-        `appendSheetData append updated:${response.result.totalUpdatedCells} cells.`,
-        response.result
-      );
+      log('appendSheetData append updated', response);
     });
 };

@@ -14,9 +14,8 @@ import {
   Page,
   Tabs,
   Toolbar,
+  useStore,
 } from 'framework7-react';
-
-import { useStore } from 'framework7-react';
 
 import store from '../js/store';
 import ScoreTab from '../components/score-tab.jsx';
@@ -32,8 +31,11 @@ const calendarParams = {
   backdrop: true,
 };
 
-import { dateToSerial } from '../js/utils';
-import { readStudentRegister, getActiveStudents } from '../data/sheets';
+import {
+  readStudentRegister,
+  getActiveStudents,
+  writeStudentRegister,
+} from '../data/sheets';
 import { logger } from '../js/utils';
 const { log } = logger('main');
 
@@ -44,42 +46,50 @@ export default () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [scoreType, setScoreType] = useState('Attendance');
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedSection, setSelectedSection] = useState();
 
   const setLoading = (value) =>
     value ? store.dispatch('startLoading') : store.dispatch('endLoading');
 
-  // const userVersion = useStore('userVersion');
-  // const user = useMemo(() => store.getters.user.value, [userVersion]);
+  const userVersion = useStore('userVersion');
+  const user = useMemo(() => store.getters.user.value, [userVersion]);
 
   // const onStudentInfo = (info) => {
   //   setSelectedStudent(students.find((s) => s.name === info.name));
   // };
 
   useEffect(() => {
-    getActiveStudents().then((activeStudents) => {
-      const sectionsSet = new Set();
-      activeStudents.forEach(({ section }) => sectionsSet.add(section));
-      const sectionsArray = Array.from(sectionsSet).filter(Boolean).sort();
-      setSections(sectionsArray);
-      setStudents(activeStudents);
-      log('students loaded', { activeStudents, sectionsSet, sectionsArray });
+    setLoading(true);
+    log('Loading students');
+    const storedSection = window.localStorage.getItem('selectedSection');
+    getActiveStudents()
+      .then((activeStudents) => {
+        const sectionsSet = new Set();
+        activeStudents.forEach(({ section }) => sectionsSet.add(section));
+        setStudents(activeStudents);
 
-      if (!selectedSection) {
-        const storedSection = window.localStorage.getItem('selectedSection');
-        if (storedSection && sections.includes(storedSection)) {
-          setSelectedSection(storedSection);
-        } else {
-          setSelectedSection(sectionsArray[0]);
-        }
-      }
-    });
+        const sectionsArray = Array.from(sectionsSet).filter(Boolean).sort();
+        log('students loaded', { activeStudents, sectionsSet, sectionsArray });
+        setSections(sectionsArray);
+
+        const section =
+          storedSection && sectionsArray.includes(storedSection)
+            ? storedSection
+            : sectionsArray[0];
+
+        setSelectedSection(section);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
+    log('writing to local storage', { selectedSection, sections });
     if (selectedSection && sections.includes(selectedSection))
       window.localStorage.setItem('selectedSection', selectedSection);
-  }, [selectedSection]);
+    setSelectedStudents(students.filter((s) => s.section === selectedSection));
+  }, [selectedSection, sections]);
 
   useEffect(() => {
     log('Getting student data', { selectedDate, selectedSection, students });
@@ -92,6 +102,7 @@ export default () => {
       section: selectedSection,
     })
       .then((register) => {
+        log('register received values', { register });
         const registerMap = register.reduce((acc, { id, type, value }) => {
           const rec = acc[id] || { id };
           rec[type] = { value, orig: value };
@@ -107,92 +118,83 @@ export default () => {
             ...s,
             ...registerMap[s.id],
           }));
-        setSelectedStudents(selected);
         log(
           'useEffect [selectedDate, selectedSection, students] student register loaded',
           {
             selectedDate,
             selectedSection,
             selected,
+            students,
           }
         );
-        setLoading(false);
+        setSelectedStudents(selected);
       })
       .catch((err) => {
         store.dispatch('setError', err);
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [selectedDate, selectedSection, students]);
-
-  // useEffect(() => {
-  //   setLoading(true);
-  //   getData({ scoreType: 'source', indices: ranges }).then((data) => {
-  //     log('Received student data from source', {
-  //       rowIndex,
-  //       ranges,
-  //       data,
-  //     });
-  //     setUserData([scoreHeaders.Source.dates, data.map((d) => d.value)]);
-  //     setLoading(false);
-  //   });
-  // }, [selectedStudent]);
 
   const modified = useMemo(() => {
     log('useMemo called for calculating modified', {
       selectedStudents,
     });
-    const mods = selectedStudents.reduce(
-      (acc, { value, orig }) => acc || value !== orig,
-      false
+    const mods = selectedStudents.some(
+      (s) => s[scoreType] && s[scoreType].value !== s[scoreType].orig
     );
     log('useMemo calculated mods:', mods);
     return mods;
-  }, [selectedStudents]);
+  }, [selectedStudents, scoreType]);
 
   const onChange = useCallback(
     (value, name) => {
-      log('main.jsx > onChange', value, name, selectedSection);
+      const setStudentValue = (student) => {
+        student[scoreType] = student[scoreType] || {};
+        student[scoreType].value = value;
+      };
+
+      log('main.jsx > onChange', { value, name, scoreType, selectedSection });
+      const copyStudents = selectedStudents.slice();
       if (name) {
-        const index = selectedStudents.findIndex((s) => s.name === name);
-        selectedStudents[index].value = value;
+        const student = copyStudents.find((s) => s.name === name);
+        setStudentValue(student);
       } else {
-        selectedStudents.forEach((s, i) => {
-          if (s.section === selectedSection) {
-            selectedStudents[i].value = value;
-          }
-        });
+        copyStudents.forEach(setStudentValue);
       }
-      setSelectedStudents(selectedStudents.slice());
+      log('modified copy students', { selectedStudents, copyStudents });
+      setSelectedStudents(copyStudents);
     },
-    [selectedStudents, selectedSection]
+    [selectedStudents, selectedSection, scoreType]
   );
 
   const onSave = useCallback(() => {
     if (!modified) return;
     setLoading(true);
-    const serial = dateToSerial(selectedDate);
-    const colIndex = dates.findIndex((d) => d === serial);
-    const values = selectedStudents.reduce((acc, { index, value, orig }) => {
-      if (value != orig) {
-        acc.push({ ri: index, ci: colIndex, value });
-      }
-      return acc;
-    }, []);
-    log('saving data:', { scoreType, date: selectedDate, values });
-    saveData({ scoreType, values })
+    const date = selectedDate;
+    const modifiedStudents = selectedStudents.filter(
+      (s) => s[scoreType] && s[scoreType].value !== s[scoreType].orig
+    );
+    log('saving data:', { scoreType, date, selectedSection, modifiedStudents });
+    writeStudentRegister({
+      students: modifiedStudents,
+      date,
+      section: selectedSection,
+      type: scoreType,
+      user: user.email.split('@')[0],
+    })
       .then(() => {
-        setSelectedStudents(
-          selectedStudents.map((s, i) => {
-            s.orig = s.value;
-            return s;
-          })
-        );
+        modifiedStudents.forEach((s) => {
+          s[scoreType].orig = s[scoreType].value;
+        });
+        setSelectedStudents([...selectedStudents]);
         setLoading(false);
       })
       .catch((err) => {
         console.error(
           'Error saving data',
-          { scoreType, selectedDate, values },
+          { scoreType, selectedDate, selectedSection, selectedStudents },
           err
         );
         store.dispatch('setError', err);
@@ -201,11 +203,17 @@ export default () => {
   }, [selectedDate, selectedStudents, modified]);
 
   const onCancel = useCallback(() => {
-    selectedStudents.forEach((s, i) => {
-      selectedStudents[i].value = s.orig;
+    const restoredStudents = selectedStudents.map((s) => {
+      if (scoreType in s) s[scoreType].value = s[scoreType].orig;
+      return s;
     });
-    setSelectedStudents(selectedStudents.slice());
-  }, [selectedStudents]);
+    log('onCancel called with', {
+      selectedStudents,
+      scoreType,
+      restoredStudents,
+    });
+    setSelectedStudents([...restoredStudents]);
+  }, [selectedStudents, scoreType]);
 
   return (
     <Page name="students">

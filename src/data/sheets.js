@@ -1,4 +1,4 @@
-import { logger } from '../js/utils';
+import { dateToSerial, logger, toCamelCase } from '../js/utils';
 const { log } = logger('sheet');
 
 import {
@@ -6,27 +6,33 @@ import {
   saveSheetData,
   appendSheetData,
 } from '../api/google-sheet';
-import { toJson } from '../js/utils';
+import { toJson, timestampToSerial } from '../js/utils';
 
 export const readStudentRegister = async ({ date, section }) => {
   await saveSheetData([
     ['STUDENT_REGISTER_QUERY_CLASS', section],
-    ['STUDENT_REGISTER_QUERY_DATE', date.toISOString().slice(0, 10)],
+    ['STUDENT_REGISTER_QUERY_DATE', dateToSerial(date)],
   ]);
   const data = await getSheetData('STUDENT_REGISTER_QUERY_RESULT');
-  return toJson([['id', 'type', 'value', 'timestamp'], ...data.slice(1)]);
+  return toJson([data[0].map(toCamelCase), ...data.slice(1)]);
 };
 
-export const writeStudentRegister = async (registerRecords) => {
-  if (!registerRecords.length) return;
-  const values = registerRecords.map(({ date, section, id, type, value }) => [
-    new Date(),
-    date,
+export const writeStudentRegister = async ({
+  students,
+  date,
+  section,
+  type,
+  user,
+}) => {
+  if (!students.length) return;
+  const values = students.map(({ id, [type]: { value } }) => [
+    timestampToSerial(new Date()),
+    dateToSerial(date),
     section,
     id,
     type,
     value,
-    navigator.userAgent,
+    user,
   ]);
   await appendSheetData('STUDENT_REGISTER_DATA', values);
 };
