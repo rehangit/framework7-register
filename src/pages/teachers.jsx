@@ -10,16 +10,14 @@ import {
   CardContent,
   List,
   ListItem,
-  ListInput,
   f7,
   useStore,
   CardFooter,
   Button,
-  Input,
-  Block,
 } from 'framework7-react';
 
 import store from '../js/store';
+import { writeTeacherCheckIn } from '../data/sheets';
 
 const calendarParams = {
   header: true,
@@ -35,7 +33,7 @@ export default () => {
   const [timeNow, setTimeNow] = useState(new Date());
   const version = useStore('userVersion');
   const user = useMemo(() => store.state.user, [version]);
-  const [auto, setAuto] = useState(true);
+  // const [auto, setAuto] = useState(true);
   const cal = useMemo(() => {
     const calendar = f7.calendar.create({
       ...calendarParams,
@@ -47,10 +45,19 @@ export default () => {
 
   useEffect(() => {
     return () => {
-      console.log('destrying calendar');
+      console.log('destroying calendar');
       cal.destroy();
     };
   }, [cal]);
+
+  const submitCheckIn = React.useCallback(
+    (type) => () => {
+      var formData = f7.form.convertToData('#CheckInCard');
+      writeTeacherCheckIn({ ...formData, type });
+    },
+    []
+  );
+
   return (
     <Page>
       <Navbar innerClass="navbar-inner-spacing">
@@ -61,18 +68,23 @@ export default () => {
       </Navbar>
       <Card>
         <CardHeader style={{ fontWeight: 'bold' }}>Check In Details</CardHeader>
+
         <CardContent>
-          <List inlineLabels>
+          <List form formStoreData inlineLabels id="CheckInCard">
             <ListItem
               link
               title="Name"
-              after={user?.name || ''}
               loginScreenOpen="#the-login-screen"
-            />
+              type="select"
+              after={user?.name || ''}
+            >
+              <input hidden readOnly name="name" value={user?.email || ''} />
+            </ListItem>
             <ListItem
               title="Class"
               smartSelect
               smartSelectParams={{ closeOnSelect: true }}
+              name="section"
             >
               <select name="section">
                 {[
@@ -98,20 +110,23 @@ export default () => {
               title="Date"
               after={timeNow.toLocaleDateString()}
               onClick={() => cal.open()}
+              name="timestamp"
             />
             <ListItem
               link
               title="Time"
               after={timeNow.toLocaleTimeString()}
               onClick={() => cal.open()}
+              name="timestamp"
             />
+            <input hidden readOnly value={timeNow} name="timestamp" />
           </List>
         </CardContent>
         <CardFooter>
-          <Button raised fill>
+          <Button raised fill onClick={submitCheckIn('checkin')}>
             Check In
           </Button>
-          <Button raised fill disabled>
+          <Button raised fill onClick={submitCheckIn('checkout')}>
             Check Out
           </Button>
         </CardFooter>

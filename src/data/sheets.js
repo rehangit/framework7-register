@@ -45,3 +45,17 @@ export const getActiveStudents = async () => {
   log('jsonisfied data', students);
   return students;
 };
+
+export const writeTeacherCheckIn = async ({
+  name,
+  timestamp,
+  section,
+  type,
+}) => {
+  const serial = timestampToSerial(timestamp);
+  const date = Math.floor(serial);
+  const time = serial % 1;
+  const submittedAt = timestampToSerial(new Date());
+  const row = [submittedAt, date, section, name, type, time];
+  return appendSheetData('TEACHER_ATTENDANCE_DATA', [row]);
+};

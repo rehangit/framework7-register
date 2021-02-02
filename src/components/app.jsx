@@ -84,7 +84,7 @@ const app = () => {
     loaded && (
       <App {...f7params}>
         <Menu />
-        <View main url="/students/" />
+        <View main url="/teachers/" />
         <MyLoginScreen />
         <ErrorPage />
         {showA2HS ? (
