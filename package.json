@@ -23,9 +23,9 @@
   ],
   "dependencies": {
     "dom7": "^3.0.0",
-    "framework7": "^6.0.6",
+    "framework7": "^6.0.7",
     "framework7-icons": "^3.0.1",
-    "framework7-react": "^6.0.6",
+    "framework7-react": "^6.0.7",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -33,11 +33,11 @@
     "swiper": "^6.4.10"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/plugin-transform-runtime": "^7.12.10",
-    "@babel/preset-env": "^7.12.11",
-    "@babel/preset-react": "^7.12.10",
-    "@babel/runtime": "^7.12.5",
+    "@babel/core": "^7.12.13",
+    "@babel/plugin-transform-runtime": "^7.12.13",
+    "@babel/preset-env": "^7.12.13",
+    "@babel/preset-react": "^7.12.13",
+    "@babel/runtime": "^7.12.13",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
     "babel-loader": "^8.2.2",
     "chalk": "^4.1.0",
@@ -64,8 +64,8 @@
     "style-loader": "^2.0.0",
     "terser-webpack-plugin": "^5.1.0",
     "url-loader": "^4.1.1",
-    "webpack": "^5.19.0",
-    "webpack-cli": "^4.4.0",
+    "webpack": "^5.20.2",
+    "webpack-cli": "^4.5.0",
     "webpack-dev-server": "^3.11.1"
   }
 }
