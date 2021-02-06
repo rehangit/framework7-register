@@ -1,5 +1,11 @@
-import { dateToSerial, logger, toCamelCase } from '../js/utils';
-const { log } = logger('sheet');
+import {
+  dateToSerial,
+  serialToDate,
+  serialToTimestamp,
+  toCamelCase,
+  logger,
+} from '../js/utils';
+const { log = console.log } = logger('sheet');
 
 import {
   getSheetData,
@@ -10,11 +16,13 @@ import { toJson, timestampToSerial } from '../js/utils';
 
 export const readStudentRegister = async ({ date, section }) => {
   await saveSheetData([
-    ['STUDENT_REGISTER_QUERY_CLASS', section],
+    ['STUDENT_REGISTER_QUERY_SECTION', section],
     ['STUDENT_REGISTER_QUERY_DATE', dateToSerial(date)],
   ]);
   const data = await getSheetData('STUDENT_REGISTER_QUERY_RESULT');
-  return toJson([data[0].map(toCamelCase), ...data.slice(1)]);
+  return data && data.length > 1
+    ? toJson([data[0].map(toCamelCase), ...data.slice(1)])
+    : [];
 };
 
 export const writeStudentRegister = async ({
@@ -38,24 +46,23 @@ export const writeStudentRegister = async ({
 };
 
 export const getActiveStudents = async () => {
-  const data = await getSheetData('student-registrations!A2:F');
-  log('getActiveStudents result', { data });
+  const data = await getSheetData('STUDENT_REGISTRATIONS');
   const headers = ['id', 'name', 'section', 'term1', 'term2', 'term3'];
-  const students = toJson([headers, ...data]);
-  log('jsonisfied data', students);
+  const students = toJson([headers, ...data.slice(1)]);
   return students;
 };
 
 export const writeTeacherCheckIn = async ({
   name,
-  timestamp,
+  datetime,
   section,
   type,
+  username,
 }) => {
-  const serial = timestampToSerial(timestamp);
+  const serial = timestampToSerial(datetime);
   const date = Math.floor(serial);
   const time = serial % 1;
-  const submittedAt = timestampToSerial(new Date());
-  const row = [submittedAt, date, section, name, type, time];
+  const timestamp = timestampToSerial(new Date());
+  const row = [timestamp, date, section, name, type, time, username];
   return appendSheetData('TEACHER_ATTENDANCE_DATA', [row]);
 };

@@ -6,6 +6,7 @@ import '../css/score-tab.css';
 import { ListItem, List, Icon, Tab } from 'framework7-react';
 
 import StateGroupButtons from './state-group';
+import store from '../js/store';
 
 export default function ScoreTab({
   type,
@@ -47,8 +48,9 @@ export default function ScoreTab({
         {selectedStudents
           .sort(sortFn)
           .filter((s) => s.section === selectedSection)
-          .map(({ name, section, ...scores }) => {
+          .map(({ id, name, section, ...scores }) => {
             const { value, orig } = (scores && scores[scoreType]) || {};
+            const { image } = store.state.studentInfo[id];
             return (
               <ListItem
                 key={name}
@@ -57,13 +59,19 @@ export default function ScoreTab({
                 <div
                   className="title"
                   slot="title"
-                  onClick={() => onStudentInfo({ name, section })}
+                  onClick={() => {
+                    console.log('calling onStudentInfo', id);
+                    onStudentInfo(id);
+                  }}
                 >
-                  <Icon
-                    f7="person"
-                    size="22"
-                    style={{ verticalAlign: 'baseline', marginRight: '8px' }}
-                  />
+                  {image ? (
+                    <span
+                      className="image"
+                      style={{ backgroundImage: `url(${image})` }}
+                    />
+                  ) : (
+                    <Icon className="image" f7="person" color="gray" />
+                  )}
                   <span>{name}</span>
                 </div>
                 <StateGroupButtons

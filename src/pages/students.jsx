@@ -19,7 +19,7 @@ import {
 
 import store from '../js/store';
 import ScoreTab from '../components/score-tab.jsx';
-// import StudentInfo from '../';
+import StudentInfo from './student-info';
 
 const calendarParams = {
   header: true,
@@ -48,41 +48,44 @@ export default () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSection, setSelectedSection] = useState();
 
+  const [selectedStudentId, setSelectedStudentId] = useState('0');
+
   const setLoading = (value) =>
     value ? store.dispatch('startLoading') : store.dispatch('endLoading');
 
   const userVersion = useStore('userVersion');
   const user = useMemo(() => store.getters.user.value, [userVersion]);
 
-  // const onStudentInfo = (info) => {
-  //   setSelectedStudent(students.find((s) => s.name === info.name));
-  // };
-
   useEffect(() => {
     setLoading(true);
     log('Loading students');
-    const storedSection = window.localStorage.getItem('selectedSection');
-    getActiveStudents()
-      .then((activeStudents) => {
-        const sectionsSet = new Set();
-        activeStudents.forEach(({ section }) => sectionsSet.add(section));
-        setStudents(activeStudents);
+    user &&
+      getActiveStudents()
+        .then((activeStudents) => {
+          const sectionsSet = new Set();
+          activeStudents.forEach(({ section }) => sectionsSet.add(section));
+          setStudents(activeStudents);
 
-        const sectionsArray = Array.from(sectionsSet).filter(Boolean).sort();
-        log('students loaded', { activeStudents, sectionsSet, sectionsArray });
-        setSections(sectionsArray);
+          const sectionsArray = Array.from(sectionsSet).filter(Boolean).sort();
+          log('students loaded', {
+            activeStudents,
+            sectionsSet,
+            sectionsArray,
+          });
+          setSections(sectionsArray);
 
-        const section =
-          storedSection && sectionsArray.includes(storedSection)
-            ? storedSection
-            : sectionsArray[0];
+          const storedSection = window.localStorage.getItem('selectedSection');
+          const section =
+            storedSection && sectionsArray.includes(storedSection)
+              ? storedSection
+              : sectionsArray[0];
 
-        setSelectedSection(section);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+          setSelectedSection(section);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+  }, [user]);
 
   useEffect(() => {
     log('writing to local storage', { selectedSection, sections });
@@ -276,17 +279,15 @@ export default () => {
             onChange={onChange}
             selectedStudents={selectedStudents}
             selectedSection={selectedSection}
+            onStudentInfo={setSelectedStudentId}
           />
         ))}
       </Tabs>
 
-      {/* <StudentInfo
-        onClosed={() => {
-          log('closing the pop up and set user data to empty array');
-          setSelectedStudent('');
-        }}
-        student={userData}
-      /> */}
+      <StudentInfo
+        onClosed={() => setSelectedStudentId('')}
+        studentId={selectedStudentId}
+      />
     </Page>
   );
 };

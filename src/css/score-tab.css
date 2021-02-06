@@ -1,6 +1,17 @@
+.tabs .tab-active li.header .item-title {
+  text-transform: uppercase;
+}
+
 .tabs .tab-active li .item-title {
   cursor: pointer;
 }
-.tabs .tab-active li.header .item-title {
-  text-transform: uppercase;
+
+.tabs .tab-active li .item-title .image {
+  vertical-align: bottom;
+  margin-right: 8px;
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  background: lightgray center / cover;
+  border-radius: 20px;
 }
