@@ -21,6 +21,33 @@ export const getUserProfile = async () => {
     log('Update User error:', { err });
   }
 };
+export const getUsersProfiles = async () => {
+  try {
+    const signedIn = await gapi.auth2.getAuthInstance().isSignedIn.get();
+    log('Calling People API getUsersProfiles', { signedIn });
+    if (signedIn) {
+      const response = await gapi.client.people.people.listDirectoryPeople({
+        pageSize: 200,
+        readMask: 'names,emailAddresses,photos',
+        sources: ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'],
+      });
+      log('People API Response', response);
+
+      const profiles = response.result.people.map(
+        ({ names, emailAddresses, photos }) => ({
+          name: names[0].displayName,
+          email: emailAddresses[0].value,
+          image: (photos && photos[0].url) || '',
+        })
+      );
+      log('getUserProfiles returning profiles', profiles);
+      return profiles;
+    }
+    log('not signedIn yet or the status unknown', gapi);
+  } catch (err) {
+    log('Update User error:', { err });
+  }
+};
 
 export const onGapiAvailable = async () => {
   const g = gapi || window.gapi;

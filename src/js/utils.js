@@ -1,3 +1,15 @@
+import { arrayOf } from 'prop-types';
+
+export const logger = (moduleName) => {
+  const _log = (...params) => {
+    console.log(`[${moduleName}]:`, ...params);
+  };
+  return {
+    log: (...args) => _log(...args),
+  };
+};
+
+const { log } = logger('utils');
 export const dateToSerial = (date) => {
   const startOfDay = new Date(new Date(date).toISOString().slice(0, 10));
   const serial = Math.floor(
@@ -21,13 +33,27 @@ export const indexToLetter = (n) => {
 export const serialToDate = (serial) =>
   new Date((Math.floor(serial) - 25569) * 86400 * 1000);
 
-export const toJson = (table) => {
+export const serialToTimestamp = (serial) =>
+  new Date((serial - 25569.0) * 86400 * 1000);
+
+const typeConverters = {
+  serialToDate,
+  dateToSerial,
+};
+export const toJson = (table, types = {}) => {
   if (table.length < 1) return {};
 
   const header = table[0];
   return table.slice(1).reduce((acc, row) => {
     const rowData = header.reduce((rec, key, c) => {
-      rec[key] = row[c];
+      const fn = types[key];
+      const conv = fn
+        ? typeof fn === 'function'
+          ? fn
+          : typeConverters[fn]
+        : (a) => a;
+      const value = conv(row[c]);
+      rec[key] = value;
       return rec;
     }, {});
     if (rowData[header[0]]) acc.push(rowData);
@@ -35,15 +61,49 @@ export const toJson = (table) => {
   }, []);
 };
 
-export const logger = (moduleName) => {
-  const _log = (...params) => {
-    console.log(`[${moduleName}]:`, ...params);
-  };
-  return {
-    log: (...args) => _log(...args),
-  };
+export const toIndexed = (arrayOfObjects = [], index) => {
+  const name =
+    index || (arrayOfObjects.length && Object.keys(arrayOfObjects[0])[0]);
+  return arrayOfObjects.reduce((acc, rec) => {
+    const id = rec[name];
+    acc[id] = rec;
+    return acc;
+  }, {});
 };
 
 export const toCamelCase = (str) => {
-  return str[0].toLowerCase() + str.slice(1);
+  const [first, ...words] = str.split(' ');
+  return [
+    first[0].toLowerCase(),
+    first.slice(1),
+    ...words.map((w) => w[0].toUpperCase() + w.slice(1)),
+  ].join('');
+};
+
+export const getCached = async (name, expiryDuration, fn) => {
+  const cached = JSON.parse(window.localStorage.getItem(name) || '{}');
+  if (
+    cached &&
+    cached.expiry &&
+    cached.data &&
+    cached.expiry > new Date().getTime()
+  ) {
+    log(
+      `getCached for '${name}' returning from localStorage: ${cached.data.length} items`
+    );
+    return cached.data;
+  }
+
+  const data = await fn();
+  log(`received data from '${name}' from calling fn`, data);
+
+  if (data && (typeof data !== 'array' || data.length > 1))
+    window.localStorage.setItem(
+      name,
+      JSON.stringify({
+        expiry: new Date().getTime() + expiryDuration,
+        data,
+      })
+    );
+  return data;
 };
