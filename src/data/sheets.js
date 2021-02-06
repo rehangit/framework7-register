@@ -66,3 +66,14 @@ export const writeTeacherCheckIn = async ({
   const row = [timestamp, date, section, name, type, time, username];
   return appendSheetData('TEACHER_ATTENDANCE_DATA', [row]);
 };
+
+export const getTeachersCheckins = async () => {
+  const data = await getSheetData('TEACHER_ATTENDANCE_DATA');
+  if (!data || data.length < 2) return [];
+  const headers = data[0].map(toCamelCase);
+  return toJson([headers, ...data.slice(1)], {
+    timestamp: (x) => serialToTimestamp(x),
+    date: (x) => serialToDate(x),
+    time: (x) => serialToTimestamp(x).toLocaleTimeString(),
+  });
+};

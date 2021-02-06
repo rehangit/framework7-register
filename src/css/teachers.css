@@ -1,0 +1,24 @@
+.list .media-item .item-after .badge {
+  font-size: larger;
+  padding: 0.2em 0.8em;
+  display: block;
+  margin: 0.1em 0;
+  line-height: 1;
+  height: 1.4em;
+}
+
+.list .media-item .item-text {
+  font-size: x-small;
+}
+
+.fab.fab-morph.fab-opened {
+  z-index: -10;
+}
+
+.card .button {
+  min-width: 120px;
+}
+
+.card .button i.icon.f7-icons {
+  margin-right: 16px;
+}

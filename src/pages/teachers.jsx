@@ -1,136 +1,101 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Navbar,
   NavLeft,
   NavTitle,
   Page,
   Link,
-  Card,
-  CardHeader,
-  CardContent,
   List,
   ListItem,
-  f7,
   useStore,
-  CardFooter,
-  Button,
+  BlockTitle,
+  Icon,
+  Badge,
+  Fab,
+  f7,
 } from 'framework7-react';
 
+import '../css/teachers.css';
+
+import { getCached, logger } from '../js/utils';
+const { log } = logger('teachers');
+
 import store from '../js/store';
-import { writeTeacherCheckIn } from '../data/sheets';
+import { getTeachersCheckins } from '../data/sheets';
+import Checkin from './checkin';
 
-const calendarParams = {
-  header: true,
-  timePicker: true,
-  closeByOutsideClick: true,
-  closeByBackdropClick: true,
-  openIn: 'customModal',
-  backdrop: true,
-  footer: true,
-};
-
-export default () => {
-  const [timeNow, setTimeNow] = useState(new Date());
+export default function TeachersCheckins() {
   const version = useStore('userVersion');
   const user = useMemo(() => store.state.user, [version]);
-  // const [auto, setAuto] = useState(true);
-  const cal = useMemo(() => {
-    const calendar = f7.calendar.create({
-      ...calendarParams,
-      value: [timeNow],
-    });
-    calendar.on('closed', () => setTimeNow(calendar.value[0]));
-    return calendar;
-  }, [calendarParams]);
+
+  const [checkins, setCheckins] = useState([]);
+  const [update, setUpdate] = useState(0);
+  const startLoading = () => store.dispatch('startLoading');
+  const endLoading = () => store.dispatch('endLoading');
 
   useEffect(() => {
-    return () => {
-      console.log('destroying calendar');
-      cal.destroy();
-    };
-  }, [cal]);
-
-  const submitCheckIn = React.useCallback(
-    (type) => () => {
-      var formData = f7.form.convertToData('#CheckInCard');
-      writeTeacherCheckIn({ ...formData, type });
-    },
-    []
-  );
+    startLoading();
+    getCached('teachers_checkin', 1 * 60 * 1000, getTeachersCheckins)
+      .then((array) => {
+        log('checkins data received', array);
+        if (array) setCheckins(array);
+      })
+      .finally(endLoading);
+  }, [update]);
 
   return (
     <Page>
       <Navbar innerClass="navbar-inner-spacing">
         <NavLeft>
           <Link iconF7="bars" panelOpen="left" />
-          <NavTitle>Teacher Checkin</NavTitle>
+          <NavTitle>Teachers Attendance</NavTitle>
         </NavLeft>
       </Navbar>
-      <Card>
-        <CardHeader style={{ fontWeight: 'bold' }}>Check In Details</CardHeader>
+      <Fab
+        position="right-top"
+        text="Start / End"
+        color="theme"
+        onClick={() =>
+          f7.input.scrollIntoView('#top-of-the-list', 200, false, true)
+        }
+        morphTo=".add-checkin"
+      >
+        <Icon f7="plus"></Icon>
+      </Fab>
+      <BlockTitle id="top-of-the-list">Today</BlockTitle>
+      <List mediaList>
+        <Checkin onUpdate={() => setUpdate(new Date())} />
+        {checkins
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .map((ci, i) => {
+            const color =
+              user && user.email.includes(ci.user) ? 'theme' : 'gray';
+            const icon =
+              ci.type === 'Start'
+                ? 'arrow_up_circle_fill'
+                : 'arrow_down_circle_fill';
 
-        <CardContent>
-          <List form formStoreData inlineLabels id="CheckInCard">
-            <ListItem
-              link
-              title="Name"
-              loginScreenOpen="#the-login-screen"
-              type="select"
-              after={user?.name || ''}
-            >
-              <input hidden readOnly name="name" value={user?.email || ''} />
-            </ListItem>
-            <ListItem
-              title="Class"
-              smartSelect
-              smartSelectParams={{ closeOnSelect: true }}
-              name="section"
-            >
-              <select name="section">
-                {[
-                  'B1',
-                  'B2',
-                  'B3',
-                  'B4',
-                  'G1',
-                  'G2',
-                  'G3',
-                  'G4',
-                  'W1',
-                  'W2',
-                ].map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </ListItem>
-            <ListItem
-              link
-              title="Date"
-              after={timeNow.toLocaleDateString()}
-              onClick={() => cal.open()}
-              name="timestamp"
-            />
-            <ListItem
-              link
-              title="Time"
-              after={timeNow.toLocaleTimeString()}
-              onClick={() => cal.open()}
-              name="timestamp"
-            />
-            <input hidden readOnly value={timeNow} name="timestamp" />
-          </List>
-        </CardContent>
-        <CardFooter>
-          <Button raised fill onClick={submitCheckIn('checkin')}>
-            Check In
-          </Button>
-          <Button raised fill onClick={submitCheckIn('checkout')}>
-            Check Out
-          </Button>
-        </CardFooter>
-      </Card>
+            return (
+              <ListItem
+                key={i}
+                badgeColor={color}
+                title={ci.name}
+                subtitle={`${
+                  ci.type === 'Start' ? 'Started' : 'Finished'
+                } class: ${ci.section}`}
+                text={ci.timestamp.toLocaleString()}
+              >
+                <Icon f7={icon} slot="media" size="48" color={color} />
+                <div
+                  slot="after"
+                  style={{ position: 'absolute', right: 0, top: 0 }}
+                >
+                  <Badge color={color}>{ci.time.slice(0, 5)}</Badge>
+                </div>
+              </ListItem>
+            );
+          })}
+      </List>
     </Page>
   );
-};
+}
