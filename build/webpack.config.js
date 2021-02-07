@@ -40,9 +40,9 @@ module.exports = {
   devServer: {
     hot: true,
     open: false,
-    compress: true,
+    compress: false,
     contentBase: '/www/',
-    disableHostCheck: true,
+    disableHostCheck: false,
     historyApiFallback: true,
   },
   optimization: {

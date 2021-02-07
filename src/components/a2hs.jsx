@@ -1,4 +1,5 @@
 import React from 'react';
+import { Fab } from 'framework7-react';
 
 export default function A2HS() {
   const [showA2HS, setShowA2HS] = React.useState(false);

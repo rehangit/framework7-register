@@ -1,17 +1,7 @@
-import {
-  dateToSerial,
-  serialToDate,
-  serialToTimestamp,
-  toCamelCase,
-  logger,
-} from '../js/utils';
+import { dateToSerial, serialToDate, serialToTimestamp, toCamelCase, logger } from '../js/utils';
 const { log = console.log } = logger('sheet');
 
-import {
-  getSheetData,
-  saveSheetData,
-  appendSheetData,
-} from '../api/google-sheet';
+import { getSheetData, saveSheetData, appendSheetData } from '../api/google-sheet';
 import { toJson, timestampToSerial } from '../js/utils';
 
 export const readStudentRegister = async ({ date, section }) => {
@@ -20,18 +10,10 @@ export const readStudentRegister = async ({ date, section }) => {
     ['STUDENT_REGISTER_QUERY_DATE', dateToSerial(date)],
   ]);
   const data = await getSheetData('STUDENT_REGISTER_QUERY_RESULT');
-  return data && data.length > 1
-    ? toJson([data[0].map(toCamelCase), ...data.slice(1)])
-    : [];
+  return data && data.length > 1 ? toJson([data[0].map(toCamelCase), ...data.slice(1)]) : [];
 };
 
-export const writeStudentRegister = async ({
-  students,
-  date,
-  section,
-  type,
-  user,
-}) => {
+export const writeStudentRegister = async ({ students, date, section, type, user }) => {
   if (!students.length) return;
   const values = students.map(({ id, [type]: { value } }) => [
     timestampToSerial(new Date()),
@@ -52,13 +34,7 @@ export const getActiveStudents = async () => {
   return students;
 };
 
-export const writeTeacherCheckIn = async ({
-  name,
-  datetime,
-  section,
-  type,
-  username,
-}) => {
+export const writeTeacherCheckIn = async ({ name, datetime, section, type, username }) => {
   const serial = timestampToSerial(datetime);
   const date = Math.floor(serial);
   const time = serial % 1;
@@ -76,4 +52,8 @@ export const getTeachersCheckins = async () => {
     date: (x) => serialToDate(x),
     time: (x) => serialToTimestamp(x).toLocaleTimeString(),
   });
+};
+
+export const getStudentsPerClass = async () => {
+  const data = await getSheetData('');
 };
