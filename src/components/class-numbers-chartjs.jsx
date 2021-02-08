@@ -1,12 +1,16 @@
 import React from 'react';
 import { Block, BlockHeader, useStore } from 'framework7-react';
 import { Bar, defaults } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import store from '../js/store';
 
 export default function ClassNumbersBarChart() {
-  const students = useStore('studentInfo');
+  const version = useStore('studentInfoVersion');
+
   const { labels, values } = React.useMemo(() => {
+    const students = store.state.studentInfo;
+    console.log('[class-numbers-chartjs]', { students, version });
     const classCounts =
       (students &&
         Object.values(students).reduce((acc, { class: c }) => {
@@ -17,9 +21,9 @@ export default function ClassNumbersBarChart() {
     const labels = Object.keys(classCounts).sort();
     const values = labels.map((l) => classCounts[l]);
     return { labels, values };
-  }, [students]);
+  }, [version]);
 
-  console.log('chartjs labels and values', { labels, values });
+  console.log('chartjs labels and values', { labels, values, version });
   const colors = {
     B: 'dodgerblue',
     G: 'indianred',
@@ -37,6 +41,7 @@ export default function ClassNumbersBarChart() {
       {
         data: values,
         backgroundColor: labels.map((label) => colors[label[0]]),
+        datalabels: { color: 'white', anchor: 'end', align: 'bottom' },
       },
     ],
   };
