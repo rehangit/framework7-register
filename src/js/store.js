@@ -6,14 +6,9 @@ import { getCached, logger, toCamelCase, toIndexed, toJson } from '../js/utils';
 const { log } = logger('store');
 
 const showLoader = (show) =>
-  f7 && f7.preloader
-    ? show
-      ? f7.preloader.show()
-      : f7.preloader.hide()
-    : null;
+  f7 && f7.preloader ? (show ? f7.preloader.show() : f7.preloader.hide()) : null;
 
-const getProfiles = async () =>
-  getCached('user_profiles', 24 * 3600 * 1000, getUsersProfiles);
+const getProfiles = async () => getCached('user_profiles', 24 * 3600 * 1000, getUsersProfiles);
 
 const getStudentsInfo = async () =>
   getCached('students_info', 24 * 3600 * 1000, async () => {

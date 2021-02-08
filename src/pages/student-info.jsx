@@ -3,34 +3,16 @@ import 'framework7-icons';
 
 import { serialToDate } from '../js/utils';
 
-import {
-  Page,
-  Block,
-  Navbar,
-  Popup,
-  NavRight,
-  Link,
-  f7,
-} from 'framework7-react';
+import { Page, Block, Navbar, Popup, NavRight, Link, f7 } from 'framework7-react';
 import store from '../js/store';
 
 const StudentInfo = ({ studentId, onClosed }) => {
   const studentInfo = store.state.studentInfo;
-  const {
-    id,
-    fullName,
-    parentName,
-    dateOfBirth,
-    dateOfAdmission,
-    parentId,
-    age,
-    image = '',
-  } = studentInfo?.[studentId] || {};
+  const { id, fullName, parentName, dateOfBirth, dateOfAdmission, parentId, age, image = '' } =
+    studentInfo?.[studentId] || {};
   console.log('[StudentInfo]: ', { studentInfo, studentId, id, fullName });
 
-  const imageSrcSet = image
-    ? `${image} 100w, ${image.replace('s100', 's512')} 512w`
-    : '';
+  const imageSrcSet = image ? `${image} 100w, ${image.replace('s100', 's512')} 512w` : '';
 
   return (
     <Popup className="student-info-popup" opened={!!id}>
@@ -59,8 +41,7 @@ const StudentInfo = ({ studentId, onClosed }) => {
               <tr>
                 <th>Date of Birth</th>
                 <td>
-                  {serialToDate(dateOfBirth).toLocaleDateString()} (
-                  {Number(age).toFixed(1)} years)
+                  {serialToDate(dateOfBirth).toLocaleDateString()} ({Number(age).toFixed(1)} years)
                 </td>
               </tr>
               <tr>

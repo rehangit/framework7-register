@@ -31,11 +31,7 @@ const calendarParams = {
   backdrop: true,
 };
 
-import {
-  readStudentRegister,
-  getActiveStudents,
-  writeStudentRegister,
-} from '../data/sheets';
+import { readStudentRegister, getActiveStudents, writeStudentRegister } from '../data/sheets';
 import { logger } from '../js/utils';
 const { log } = logger('main');
 
@@ -121,15 +117,12 @@ export default () => {
             ...s,
             ...registerMap[s.id],
           }));
-        log(
-          'useEffect [selectedDate, selectedSection, students] student register loaded',
-          {
-            selectedDate,
-            selectedSection,
-            selected,
-            students,
-          }
-        );
+        log('useEffect [selectedDate, selectedSection, students] student register loaded', {
+          selectedDate,
+          selectedSection,
+          selected,
+          students,
+        });
         setSelectedStudents(selected);
       })
       .catch((err) => {
@@ -284,10 +277,7 @@ export default () => {
         ))}
       </Tabs>
 
-      <StudentInfo
-        onClosed={() => setSelectedStudentId('')}
-        studentId={selectedStudentId}
-      />
+      <StudentInfo onClosed={() => setSelectedStudentId('')} studentId={selectedStudentId} />
     </Page>
   );
 };

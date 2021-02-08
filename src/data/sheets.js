@@ -34,17 +34,15 @@ export const getActiveStudents = async () => {
   return students;
 };
 
-export const writeTeacherCheckIn = async ({ name, datetime, section, type, username }) => {
-  const serial = timestampToSerial(datetime);
-  const date = Math.floor(serial);
-  const time = serial % 1;
+export const writeTeacherCheckIn = async ({ name, date, time, section, type, username }) => {
+  const serial = Math.floor(dateToSerial(date));
   const timestamp = timestampToSerial(new Date());
   const row = [timestamp, date, section, name, type, time, username];
   return appendSheetData('TEACHER_ATTENDANCE_DATA', [row]);
 };
 
 export const getTeachersCheckins = async () => {
-  const data = await getSheetData('TEACHER_ATTENDANCE_DATA');
+  const data = await getSheetData('TEACHER_ATTENDANCE_DATA_QUERY');
   if (!data || data.length < 2) return [];
   const headers = data[0].map(toCamelCase);
   return toJson([headers, ...data.slice(1)], {

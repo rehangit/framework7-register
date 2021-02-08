@@ -69,9 +69,7 @@ export default ({}) => {
               </ListButton>
             ) : null}
           </List>
-          <BlockFooter>
-            Please sign in using your organisation G Suite account
-          </BlockFooter>
+          <BlockFooter>Please sign in using your organisation G Suite account</BlockFooter>
           {signedIn ? (
             <List>
               <ListButton onClick={() => setOpened(false)}>Cancel</ListButton>

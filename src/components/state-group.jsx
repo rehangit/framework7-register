@@ -12,11 +12,7 @@ export default function StateGroup({
   isDirty,
   onClickName,
 }) {
-  const classes = [
-    'state-group',
-    isDirty ? 'dirty' : '',
-    header && 'header',
-  ].join(' ');
+  const classes = ['state-group', isDirty ? 'dirty' : '', header && 'header'].join(' ');
   return (
     <Segmented raised className={classes} slot={slot}>
       {labels.split('').map((label, i) => (
@@ -25,9 +21,7 @@ export default function StateGroup({
           active={(value !== undefined && value.toString() === label) || header}
           onClick={() => {
             const onchangeParam =
-              value !== undefined && value.toString() === label
-                ? undefined
-                : label;
+              value !== undefined && value.toString() === label ? undefined : label;
             onChange(onchangeParam);
           }}
           className={`label-${label}`}

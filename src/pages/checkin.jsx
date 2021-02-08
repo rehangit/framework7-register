@@ -10,14 +10,15 @@ import {
   CardFooter,
   Button,
   Link,
+  ListInput,
 } from 'framework7-react';
 
 import store from '../js/store';
 import { writeTeacherCheckIn } from '../data/sheets';
 
-const calendarParams = {
+const defaultCalendarParams = {
   header: true,
-  timePicker: true,
+  timePicker: false,
   closeByOutsideClick: true,
   closeByBackdropClick: true,
   openIn: 'customModal',
@@ -26,25 +27,13 @@ const calendarParams = {
 };
 
 export default ({ onUpdate }) => {
-  const [timeNow, setTimeNow] = useState(new Date());
+  const timeNow = new Date();
   const version = useStore('userVersion');
   const user = useMemo(() => store.state.user, [version]);
-  // const [auto, setAuto] = useState(true);
-  const cal = useMemo(() => {
-    const calendar = f7.calendar.create({
-      ...calendarParams,
-      value: [timeNow],
-    });
-    calendar.on('closed', () => setTimeNow(calendar.value[0]));
-    return calendar;
-  }, [calendarParams]);
-
-  useEffect(() => {
-    return () => {
-      console.log('destroying calendar');
-      cal.destroy();
-    };
-  }, [cal]);
+  const calendarParams = {
+    ...defaultCalendarParams,
+    value: [timeNow],
+  };
 
   const submitCheckIn = React.useCallback(
     (type) => (e) => {
@@ -53,7 +42,7 @@ export default ({ onUpdate }) => {
       writeTeacherCheckIn({
         ...formData,
         type,
-        username: user.email.split('@')[0],
+        username: user?.email.split('@')[0],
       }).then(onUpdate);
     },
     []
@@ -68,46 +57,42 @@ export default ({ onUpdate }) => {
 
       <CardContent>
         <List form formStoreData inlineLabels id="CheckInCard">
-          <ListItem
-            link
-            title="Name"
+          <ListInput
+            label="Name"
+            name="name"
             loginScreenOpen="#the-login-screen"
+            readonly
+            value={user?.name || ''}
+          ></ListInput>
+          <ListInput
+            label="Class"
             type="select"
-            after={user?.name || ''}
-          >
-            <input hidden readOnly name="name" value={user?.name || ''} />
-          </ListItem>
-          <ListItem
-            title="Class"
-            smartSelect
-            smartSelectParams={{ closeOnSelect: true }}
+            defaultValue="B1"
+            placeholder="Please select your class"
             name="section"
           >
-            <select name="section">
-              {['B1', 'B2', 'B3', 'B4', 'G1', 'G2', 'G3', 'G4', 'W1', 'W2'].map(
-                (c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                )
-              )}
-            </select>
-          </ListItem>
-          <ListItem
-            link
-            title="Date"
-            after={timeNow.toLocaleDateString()}
-            onClick={() => cal.open()}
-            name="datetime"
+            {['B1', 'B2', 'B3', 'B4', 'G1', 'G2', 'G3', 'G4', 'W1', 'W2'].map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </ListInput>
+          <ListInput
+            label="Date"
+            type="datepicker"
+            placeholder="Select date"
+            readonly
+            name="date"
+            defaultValue={timeNow.toLocaleDateString()}
+            calendarParams={calendarParams}
           />
-          <ListItem
-            link
-            title="Time"
-            after={timeNow.toLocaleTimeString()}
-            onClick={() => cal.open()}
-            name="datetime"
+          <ListInput
+            label="Time"
+            type="time"
+            placeholder="Please choose..."
+            name="time"
+            defaultValue={timeNow.toLocaleTimeString().slice(0, 5)}
           />
-          <input hidden readOnly value={timeNow} name="datetime" />
         </List>
       </CardContent>
       <CardFooter>
