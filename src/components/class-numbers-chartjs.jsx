@@ -1,6 +1,6 @@
 import React from 'react';
 import { Block, BlockHeader, useStore } from 'framework7-react';
-import { Bar, defaults } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import store from '../js/store';
@@ -33,6 +33,7 @@ export default function ClassNumbersBarChart() {
   const options = {
     legend: { display: false },
     scales: { yAxes: [{ ticks: { beginAtZero: true } }] },
+    plugins: [ChartDataLabels],
   };
 
   const data = {

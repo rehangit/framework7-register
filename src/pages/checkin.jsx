@@ -1,20 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import {
   Card,
   CardHeader,
   CardContent,
   List,
-  ListItem,
   f7,
-  useStore,
   CardFooter,
   Button,
   Link,
   ListInput,
 } from 'framework7-react';
 
-import store from '../js/store';
-import { writeTeacherCheckIn } from '../data/sheets';
+import { logger } from '../js/utils';
+const { log } = logger('checkin');
 
 const defaultCalendarParams = {
   header: true,
@@ -26,30 +24,28 @@ const defaultCalendarParams = {
   footer: true,
 };
 
-export default ({ onUpdate }) => {
-  const timeNow = new Date();
-  const version = useStore('userVersion');
-  const user = useMemo(() => store.state.user, [version]);
-  const calendarParams = {
-    ...defaultCalendarParams,
-    value: [timeNow],
+export default ({ onUpdate, ...props }) => {
+  const submitCheckIn = (type) => (e) => {
+    console.log('submit checkin event', e);
+    const formData = f7.form.convertToData('#CheckInCard');
+    return onUpdate({ ...formData, type });
   };
 
-  const submitCheckIn = React.useCallback(
-    (type) => (e) => {
-      console.log('submit checkin event', e);
-      var formData = f7.form.convertToData('#CheckInCard');
-      writeTeacherCheckIn({
-        ...formData,
-        type,
-        username: user?.email.split('@')[0],
-      }).then(onUpdate);
-    },
-    []
-  );
+  const [values, setValues] = React.useState({ date: new Date(), ...props });
+
+  const [currentTime, setCurrentTime] = React.useState('timer not working');
+  const [timer, setTimer] = React.useState(null);
+  React.useEffect(() => {
+    if (values && values.time) return;
+    const t = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    setTimer(t);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
-    <Card className="add-checkin fab-morph-target">
+    <Card className="add-checkin fab-morph-target" outline backdrop borderColor="blue">
       <CardHeader style={{ fontWeight: 'bold' }}>
         Add Attendance Update
         <Link href="#" className="fab-close" iconF7="xmark" />
@@ -62,8 +58,8 @@ export default ({ onUpdate }) => {
             name="name"
             loginScreenOpen="#the-login-screen"
             readonly
-            value={user?.name || ''}
-          ></ListInput>
+            value={values?.name || ''}
+          />
           <ListInput
             label="Class"
             type="select"
@@ -83,21 +79,25 @@ export default ({ onUpdate }) => {
             placeholder="Select date"
             readonly
             name="date"
-            defaultValue={timeNow.toLocaleDateString()}
-            calendarParams={calendarParams}
+            defaultValue={values.date}
+            calendarParams={{ ...defaultCalendarParams, value: [values.date] }}
           />
           <ListInput
-            label="Time"
+            label="Time:"
             type="time"
             placeholder="Please choose..."
             name="time"
-            defaultValue={timeNow.toLocaleTimeString().slice(0, 5)}
+            value={(values && values.time) || currentTime}
+            onChange={(e) => {
+              log('onChange called', { values });
+              if (timer) clearTimeout(timer);
+              setValues({ ...values, time: e.target.value });
+            }}
           />
         </List>
       </CardContent>
       <CardFooter>
         <Button
-          raised
           fill
           iconF7="arrow_up_circle_fill"
           className="fab-close"
@@ -106,7 +106,6 @@ export default ({ onUpdate }) => {
           Start
         </Button>
         <Button
-          raised
           fill
           iconF7="arrow_down_circle_fill"
           className="fab-close"

@@ -4,9 +4,7 @@ import {
   f7,
   Page,
   LoginScreenTitle,
-  Button,
   BlockFooter,
-  Block,
   LoginScreen,
   View,
   ListButton,
@@ -19,7 +17,7 @@ import store from '../js/store';
 import { logger } from '../js/utils';
 const { log } = logger('login');
 
-export default ({}) => {
+export default () => {
   const version = useStore('userVersion');
   const [user, signedIn] = useMemo(() => {
     const u = store.getters.user.value;

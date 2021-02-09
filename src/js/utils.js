@@ -1,5 +1,3 @@
-import { arrayOf } from 'prop-types';
-
 export const logger = (moduleName) => {
   const _log = (...params) => {
     console.log(`[${moduleName}]:`, ...params);
@@ -87,7 +85,7 @@ export const getCached = async (name, expiryDuration, fn) => {
   const data = await fn();
   log(`received data from '${name}' from calling fn`, data);
 
-  if (data && (typeof data !== 'array' || data.length > 1))
+  if (data) {
     window.localStorage.setItem(
       name,
       JSON.stringify({
@@ -95,5 +93,6 @@ export const getCached = async (name, expiryDuration, fn) => {
         data,
       })
     );
+  }
   return data;
 };

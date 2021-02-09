@@ -35,9 +35,9 @@ export default function ScoreTab({
         {selectedStudents
           .sort(sortFn)
           .filter((s) => s.section === selectedSection)
-          .map(({ id, name, section, ...scores }) => {
+          .map(({ id, name, ...scores }) => {
             const { value, orig } = (scores && scores[scoreType]) || {};
-            const { image } = store.state.studentInfo[id];
+            const { image = '' } = store.state.studentInfo?.[id] || {};
             return (
               <ListItem key={name} style={{ opacity: 1, transition: 'all 1s ease' }}>
                 <div

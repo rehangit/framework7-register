@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Navbar,
   NavLeft,
@@ -17,11 +17,13 @@ import {
 
 import '../css/teachers.css';
 
+import { startLoading, endLoading } from '../js/loader';
 import { getCached, logger } from '../js/utils';
 const { log } = logger('teachers');
 
 import store from '../js/store';
-import { getTeachersCheckins } from '../data/sheets';
+import { getTeachersCheckins, writeTeacherCheckIn } from '../data/sheets';
+
 import Checkin from './checkin';
 
 export default function TeachersCheckins() {
@@ -29,19 +31,43 @@ export default function TeachersCheckins() {
   const user = useMemo(() => store.state.user, [version]);
 
   const [checkins, setCheckins] = useState([]);
-  const [update, setUpdate] = useState(0);
-  const startLoading = () => store.dispatch('startLoading');
-  const endLoading = () => store.dispatch('endLoading');
+  const [checkin, setCheckin] = useState(null);
+
+  const populate = (quick) => {
+    startLoading();
+    getCached('teachers_checkin', quick ? 0 : 1 * 60 * 1000, getTeachersCheckins)
+      .then(setCheckins)
+      .finally(endLoading);
+  };
 
   useEffect(() => {
+    populate(false);
+  }, []);
+
+  const onUpdate = async ({ name, date, time, section, type }) => {
     startLoading();
-    getCached('teachers_checkin', update ? 0 : 1 * 60 * 1000, getTeachersCheckins)
-      .then((array) => {
-        log('checkins data received', array);
-        if (array) setCheckins(array);
-      })
-      .finally(endLoading);
-  }, [update]);
+    await writeTeacherCheckIn({
+      name,
+      date,
+      time,
+      section,
+      type,
+      username: user?.email.split('@')[0],
+    });
+    await populate(true);
+    endLoading();
+  };
+
+  // const onEditUpdate = (index) => {
+  //   setCheckin(checkins[index]);
+  // };
+
+  const CheckinCard = React.useMemo(
+    () => () => <Checkin onUpdate={onUpdate} name={checkin?.name || user.name}></Checkin>,
+    [checkin]
+  );
+
+  const isCurrentUser = (email) => user && user.email.includes(email);
 
   return (
     <Page>
@@ -55,27 +81,32 @@ export default function TeachersCheckins() {
         position="right-top"
         text="Start / End"
         color="theme"
-        onClick={() => f7.input.scrollIntoView('#top-of-the-list', 200, false, true)}
+        onClick={() => {
+          setCheckin(null);
+          f7.input.scrollIntoView('#top-of-the-list', 200, false, true);
+        }}
         morphTo=".add-checkin"
       >
         <Icon f7="plus"></Icon>
       </Fab>
-      <BlockTitle id="top-of-the-list">Recent Submissions</BlockTitle>
+      <BlockTitle id="top-of-the-list">Recent updates</BlockTitle>
       <List mediaList>
-        <Checkin onUpdate={() => setUpdate(new Date())} />
+        {<CheckinCard />}
         {checkins
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
           .map((ci, i) => {
-            const color = user && user.email.includes(ci.user) ? 'theme' : 'gray';
+            const color = isCurrentUser(ci.username) ? 'theme' : 'gray';
             const icon = ci.type === 'Start' ? 'arrow_up_circle_fill' : 'arrow_down_circle_fill';
 
             return (
               <ListItem
+                link={isCurrentUser(ci.username)}
                 key={i}
                 badgeColor={color}
                 title={ci.name}
                 subtitle={`${ci.type === 'Start' ? 'Started' : 'Finished'} class: ${ci.section}`}
                 text={ci.timestamp.toLocaleString()}
+                onClick={isCurrentUser(ci.username) ? () => setCheckin(ci) : null}
               >
                 <Icon f7={icon} slot="media" size="48" color={color} />
                 <div slot="after" style={{ position: 'absolute', right: 0, top: 0 }}>

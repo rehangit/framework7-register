@@ -5,14 +5,16 @@ export default function A2HS() {
   const [showA2HS, setShowA2HS] = React.useState(false);
   const [deferredPrompt, setDeferredPrompt] = React.useState(null);
 
-  addEventListener('beforeinstallprompt', (e) => {
-    console.log('Received beforeinstallprompt.');
-    e.preventDefault();
-    setDeferredPrompt(e);
-    setShowA2HS(true);
-  });
+  React.useEffect(() => {
+    addEventListener('beforeinstallprompt', (e) => {
+      console.log('Received beforeinstallprompt.');
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowA2HS(true);
+    });
+  }, []);
 
-  const onA2HS = (e) => {
+  const onA2HS = () => {
     console.assert(deferredPrompt, 'Error onA2HS called without deferredPrompt');
     setShowA2HS(false);
     deferredPrompt.prompt();

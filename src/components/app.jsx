@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import 'framework7-icons';
-import { App, View, f7ready, Fab } from 'framework7-react';
+import { App, View, f7ready } from 'framework7-react';
 
 import { logger } from '../js/utils';
 const { log } = logger('app');

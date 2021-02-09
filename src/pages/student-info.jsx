@@ -1,14 +1,14 @@
-import React, { propTypes, useMemo } from 'react';
+import React from 'react';
 import 'framework7-icons';
 
 import { serialToDate } from '../js/utils';
 
-import { Page, Block, Navbar, Popup, NavRight, Link, f7 } from 'framework7-react';
+import { Page, Block, Navbar, Popup, NavRight, Link } from 'framework7-react';
 import store from '../js/store';
 
 const StudentInfo = ({ studentId, onClosed }) => {
   const studentInfo = store.state.studentInfo;
-  const { id, fullName, parentName, dateOfBirth, dateOfAdmission, parentId, age, image = '' } =
+  const { id, fullName, parentName, dateOfBirth, dateOfAdmission, age, image = '' } =
     studentInfo?.[studentId] || {};
   console.log('[StudentInfo]: ', { studentInfo, studentId, id, fullName });
 
@@ -19,7 +19,7 @@ const StudentInfo = ({ studentId, onClosed }) => {
       <Page>
         <Navbar title={fullName}>
           <NavRight>
-            <Link onClick={onClosed}>Close</Link>
+            <Link onClick={onClosed} iconF7="xmark" />
           </NavRight>
         </Navbar>
         <Block>

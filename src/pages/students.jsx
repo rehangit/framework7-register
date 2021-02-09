@@ -33,6 +33,8 @@ const calendarParams = {
 
 import { readStudentRegister, getActiveStudents, writeStudentRegister } from '../data/sheets';
 import { logger } from '../js/utils';
+import { startLoading, endLoading } from '../js/loader';
+
 const { log } = logger('main');
 
 export default () => {
@@ -46,14 +48,11 @@ export default () => {
 
   const [selectedStudentId, setSelectedStudentId] = useState('0');
 
-  const setLoading = (value) =>
-    value ? store.dispatch('startLoading') : store.dispatch('endLoading');
-
   const userVersion = useStore('userVersion');
   const user = useMemo(() => store.getters.user.value, [userVersion]);
 
   useEffect(() => {
-    setLoading(true);
+    startLoading();
     log('Loading students');
     user &&
       getActiveStudents()
@@ -78,9 +77,7 @@ export default () => {
 
           setSelectedSection(section);
         })
-        .finally(() => {
-          setLoading(false);
-        });
+        .finally(endLoading);
   }, [user]);
 
   useEffect(() => {
@@ -94,7 +91,7 @@ export default () => {
     log('Getting student data', { selectedDate, selectedSection, students });
     if (!students || !selectedSection || !selectedDate) return;
 
-    setLoading(true);
+    startLoading();
 
     readStudentRegister({
       date: selectedDate,
@@ -128,9 +125,7 @@ export default () => {
       .catch((err) => {
         store.dispatch('setError', err);
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(endLoading);
   }, [selectedDate, selectedSection, students]);
 
   const modified = useMemo(() => {
@@ -167,7 +162,7 @@ export default () => {
 
   const onSave = useCallback(() => {
     if (!modified) return;
-    setLoading(true);
+    startLoading();
     const date = selectedDate;
     const modifiedStudents = selectedStudents.filter(
       (s) => s[scoreType] && s[scoreType].value !== s[scoreType].orig
@@ -185,7 +180,6 @@ export default () => {
           s[scoreType].orig = s[scoreType].value;
         });
         setSelectedStudents([...selectedStudents]);
-        setLoading(false);
       })
       .catch((err) => {
         console.error(
@@ -194,8 +188,8 @@ export default () => {
           err
         );
         store.dispatch('setError', err);
-        setLoading(false);
-      });
+      })
+      .finally(endLoading);
   }, [selectedDate, selectedStudents, modified]);
 
   const onCancel = useCallback(() => {

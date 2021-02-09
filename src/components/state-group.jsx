@@ -3,15 +3,7 @@ import { Segmented, Button } from 'framework7-react';
 
 import '../css/state-group.css';
 
-export default function StateGroup({
-  labels,
-  onChange,
-  value,
-  slot,
-  header,
-  isDirty,
-  onClickName,
-}) {
+export default function StateGroup({ labels, onChange, value, slot, header, isDirty }) {
   const classes = ['state-group', isDirty ? 'dirty' : '', header && 'header'].join(' ');
   return (
     <Segmented raised className={classes} slot={slot}>

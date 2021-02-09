@@ -1,5 +1,4 @@
-import { dateToSerial, serialToDate, serialToTimestamp, toCamelCase, logger } from '../js/utils';
-const { log = console.log } = logger('sheet');
+import { dateToSerial, serialToDate, serialToTimestamp, toCamelCase } from '../js/utils';
 
 import { getSheetData, saveSheetData, appendSheetData } from '../api/google-sheet';
 import { toJson, timestampToSerial } from '../js/utils';
@@ -35,7 +34,6 @@ export const getActiveStudents = async () => {
 };
 
 export const writeTeacherCheckIn = async ({ name, date, time, section, type, username }) => {
-  const serial = Math.floor(dateToSerial(date));
   const timestamp = timestampToSerial(new Date());
   const row = [timestamp, date, section, name, type, time, username];
   return appendSheetData('TEACHER_ATTENDANCE_DATA', [row]);
@@ -50,8 +48,4 @@ export const getTeachersCheckins = async () => {
     date: (x) => serialToDate(x),
     time: (x) => serialToTimestamp(x).toLocaleTimeString(),
   });
-};
-
-export const getStudentsPerClass = async () => {
-  const data = await getSheetData('');
 };
