@@ -1,3 +1,4 @@
+const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -6,8 +7,7 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-
-const path = require('path');
+const { GenerateSW } = require('workbox-webpack-plugin');
 
 function resolvePath(dir) {
   return path.join(__dirname, '..', dir);
@@ -26,7 +26,7 @@ module.exports = {
     path: resolvePath('www'),
     filename: 'js/[name].js',
     chunkFilename: 'js/[name].js',
-    publicPath: '',
+    publicPath: '/',
     hotUpdateChunkFilename: 'hot/hot-update.js',
     hotUpdateMainFilename: 'hot/hot-update.json',
   },
@@ -203,15 +203,13 @@ module.exports = {
           to: resolvePath('www/static/images'),
         },
         {
-          noErrorOnMissing: true,
-          from: resolvePath('src/sw.js'),
-          to: resolvePath('www/sw.js'),
-        },
-        {
           from: resolvePath('src/manifest.json'),
           to: resolvePath('www/manifest.json'),
         },
       ],
+    }),
+    new GenerateSW({
+      swDest: 'sw.js',
     }),
   ],
 };
