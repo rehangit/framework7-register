@@ -32,38 +32,39 @@ export default function ScoreTab({
           </div>
           <StateGroupButtons labels={scoreLabels} slot="after" header={true} onChange={onChange} />
         </ListItem>
-        {selectedStudents
-          .sort(sortFn)
-          .filter((s) => s.section === selectedSection)
-          .map(({ id, name, ...scores }) => {
-            const { value, orig } = (scores && scores[scoreType]) || {};
-            const { image = '' } = store.state.studentInfo?.[id] || {};
-            return (
-              <ListItem key={name} style={{ opacity: 1, transition: 'all 1s ease' }}>
-                <div
-                  className="title"
-                  slot="title"
-                  onClick={() => {
-                    console.log('calling onStudentInfo', id);
-                    onStudentInfo(id);
-                  }}
-                >
-                  {image ? (
-                    <span className="image" style={{ backgroundImage: `url(${image})` }} />
-                  ) : (
-                    <Icon className="image" f7="person" color="gray" />
-                  )}
-                  <span>{name}</span>
-                </div>
-                <StateGroupButtons
-                  labels={scoreLabels}
-                  value={value}
-                  isDirty={orig !== value}
-                  onChange={(value) => onChange(value, name)}
-                />
-              </ListItem>
-            );
-          })}
+        {selectedStudents.sort(sortFn).map(({ id, fullName, image, [scoreType]: score }) => {
+          const { value, orig } = score || {};
+          console.log('[score-tab]: redenring score tab for', {
+            id,
+            fullName,
+            [scoreType]: score,
+          });
+          return (
+            <ListItem key={id} style={{ opacity: 1, transition: 'all 1s ease' }}>
+              <div
+                className="title"
+                slot="title"
+                onClick={() => {
+                  console.log('calling onStudentInfo', id);
+                  onStudentInfo(id);
+                }}
+              >
+                {image ? (
+                  <span className="image" style={{ backgroundImage: `url(${image})` }} />
+                ) : (
+                  <Icon className="image" f7="person" color="gray" />
+                )}
+                <span>{fullName}</span>
+              </div>
+              <StateGroupButtons
+                labels={scoreLabels}
+                value={value}
+                isDirty={orig !== value}
+                onChange={(value) => onChange(value, id)}
+              />
+            </ListItem>
+          );
+        })}
       </List>
     </Tab>
   );

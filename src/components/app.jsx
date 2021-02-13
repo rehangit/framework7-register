@@ -19,7 +19,7 @@ import A2HS from './a2hs';
 
 import '../css/app.css';
 
-const VERSION = '1.0.2';
+const VERSION = '1.0.4';
 
 const app = () => {
   const f7params = {
@@ -50,7 +50,8 @@ const app = () => {
 
   useEffect(() => f7ready(() => setF7Loaded(true)), []);
 
-  log('rendering app', { loaded, f7params });
+  log('rendering app', { loaded, f7params, path: window.location.pathname });
+
   return (
     loaded && (
       <App {...f7params}>

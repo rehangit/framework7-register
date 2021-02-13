@@ -1,7 +1,12 @@
-import { dateToSerial, serialToDate, serialToTimestamp, toCamelCase } from '../js/utils';
-
+import {
+  dateToSerial,
+  serialToDate,
+  serialToTimestamp,
+  toCamelCase,
+  toJson,
+  timestampToSerial,
+} from '../js/utils';
 import { getSheetData, saveSheetData, appendSheetData } from '../api/google-sheet';
-import { toJson, timestampToSerial } from '../js/utils';
 
 export const readStudentRegister = async ({ date, section }) => {
   await saveSheetData([
@@ -29,7 +34,7 @@ export const writeStudentRegister = async ({ students, date, section, type, user
 export const getActiveStudents = async () => {
   const data = await getSheetData('STUDENT_REGISTRATIONS');
   const headers = ['id', 'name', 'section', 'term1', 'term2', 'term3'];
-  const students = toJson([headers, ...data.slice(1)]);
+  const students = toJson([headers, ...data.slice(1)]).filter(({ active }) => active);
   return students;
 };
 
@@ -45,7 +50,7 @@ export const getTeachersCheckins = async () => {
   const headers = data[0].map(toCamelCase);
   return toJson([headers, ...data.slice(1)], {
     timestamp: (x) => serialToTimestamp(x),
-    date: (x) => serialToDate(x),
+    date: (x) => serialToDate(x).toISOString().slice(0, 10),
     time: (x) => serialToTimestamp(x).toLocaleTimeString(),
   });
 };

@@ -9,8 +9,6 @@ import {
   List,
   ListInput,
   Navbar,
-  NavLeft,
-  NavTitle,
   Page,
   Tabs,
   Toolbar,
@@ -34,11 +32,11 @@ const calendarParams = {
 import { readStudentRegister, getActiveStudents, writeStudentRegister } from '../data/sheets';
 import { logger } from '../js/utils';
 import { startLoading, endLoading } from '../js/loader';
+import MainNav from '../components/main-nav';
 
-const { log } = logger('main');
+const { log } = logger('students');
 
 export default () => {
-  const [students, setStudents] = useState([]);
   const [sections, setSections] = useState([]);
 
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -48,51 +46,39 @@ export default () => {
 
   const [selectedStudentId, setSelectedStudentId] = useState('0');
 
-  const userVersion = useStore('userVersion');
-  const user = useMemo(() => store.getters.user.value, [userVersion]);
+  const students = useStore('studentInfo');
+  const user = useStore('user');
 
   useEffect(() => {
-    startLoading();
-    log('Loading students');
-    user &&
-      getActiveStudents()
-        .then((activeStudents) => {
-          const sectionsSet = new Set();
-          activeStudents.forEach(({ section }) => sectionsSet.add(section));
-          setStudents(activeStudents);
+    const sectionsSet = new Set();
+    students.forEach(({ section }) => sectionsSet.add(section));
 
-          const sectionsArray = Array.from(sectionsSet).filter(Boolean).sort();
-          log('students loaded', {
-            activeStudents,
-            sectionsSet,
-            sectionsArray,
-          });
-          setSections(sectionsArray);
+    const sectionsArray = Array.from(sectionsSet).filter(Boolean).sort();
+    log('students loaded', {
+      students,
+      sectionsSet,
+      sectionsArray,
+    });
 
-          const storedSection = window.localStorage.getItem('selectedSection');
-          const section =
-            storedSection && sectionsArray.includes(storedSection)
-              ? storedSection
-              : sectionsArray[0];
-
-          setSelectedSection(section);
-        })
-        .finally(endLoading);
-  }, [user]);
+    const storedSection = window.localStorage.getItem('selectedSection');
+    const section =
+      storedSection && sectionsArray.includes(storedSection) ? storedSection : sectionsArray[0];
+    setSections(sectionsArray);
+    setSelectedSection(section);
+  }, [students]);
 
   useEffect(() => {
+    if (!selectedSection || !sections.length || !sections.includes(selectedSection)) return;
     log('writing to local storage', { selectedSection, sections });
-    if (selectedSection && sections.includes(selectedSection))
-      window.localStorage.setItem('selectedSection', selectedSection);
+    window.localStorage.setItem('selectedSection', selectedSection);
     setSelectedStudents(students.filter((s) => s.section === selectedSection));
-  }, [selectedSection, sections]);
+  }, [selectedSection]);
 
   useEffect(() => {
-    log('Getting student data', { selectedDate, selectedSection, students });
     if (!students || !selectedSection || !selectedDate) return;
+    log('Getting student data', { selectedDate, selectedSection, students });
 
-    startLoading();
-
+    startLoading('merging student register data');
     readStudentRegister({
       date: selectedDate,
       section: selectedSection,
@@ -125,7 +111,7 @@ export default () => {
       .catch((err) => {
         store.dispatch('setError', err);
       })
-      .finally(endLoading);
+      .finally(() => endLoading('merging student register data'));
   }, [selectedDate, selectedSection, students]);
 
   const modified = useMemo(() => {
@@ -140,16 +126,16 @@ export default () => {
   }, [selectedStudents, scoreType]);
 
   const onChange = useCallback(
-    (value, name) => {
+    (value, id) => {
       const setStudentValue = (student) => {
         student[scoreType] = student[scoreType] || {};
         student[scoreType].value = value;
       };
 
-      log('main.jsx > onChange', { value, name, scoreType, selectedSection });
+      log('main.jsx > onChange', { value, id, scoreType, selectedSection });
       const copyStudents = selectedStudents.slice();
-      if (name) {
-        const student = copyStudents.find((s) => s.name === name);
+      if (id) {
+        const student = copyStudents.find((s) => s.id === id);
         setStudentValue(student);
       } else {
         copyStudents.forEach(setStudentValue);
@@ -162,7 +148,7 @@ export default () => {
 
   const onSave = useCallback(() => {
     if (!modified) return;
-    startLoading();
+    startLoading('on save');
     const date = selectedDate;
     const modifiedStudents = selectedStudents.filter(
       (s) => s[scoreType] && s[scoreType].value !== s[scoreType].orig
@@ -189,7 +175,7 @@ export default () => {
         );
         store.dispatch('setError', err);
       })
-      .finally(endLoading);
+      .finally(() => endLoading('on save'));
   }, [selectedDate, selectedStudents, modified]);
 
   const onCancel = useCallback(() => {
@@ -207,11 +193,8 @@ export default () => {
 
   return (
     <Page name="students">
-      <Navbar innerClass="navbar-inner-spacing">
-        <NavLeft>
-          <Link iconF7="bars" panelOpen="left" />
-          <NavTitle>Students</NavTitle>
-        </NavLeft>
+      <Navbar>
+        <MainNav title="Students" />
       </Navbar>
       <Toolbar hidden={modified} tabbar bottom>
         <Link tabLink="#Attendance">Attendance</Link>

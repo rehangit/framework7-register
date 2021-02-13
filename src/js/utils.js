@@ -70,16 +70,17 @@ export const toCamelCase = (str) => {
 };
 
 export const getCached = async (name, expiryDuration, fn) => {
-  const cached = JSON.parse(window.localStorage.getItem(name) || '{}');
+  const cached = JSON.parse(window.localStorage.getItem(name) || '{}') || null;
   if (
-    cached &&
-    cached.expiry &&
-    cached.data &&
-    expiryDuration > 0 &&
-    cached.expiry > new Date().getTime()
+    (cached &&
+      cached.expiry &&
+      cached.data &&
+      expiryDuration > 0 &&
+      cached.expiry > new Date().getTime()) ||
+    !fn
   ) {
-    log(`getCached for '${name}' returning from localStorage: ${cached.data.length} items`);
-    return cached.data;
+    log(`getCached for '${name}' returning from localStorage: ${cached?.data?.length} items`);
+    return cached?.data || null;
   }
 
   const data = await fn();
@@ -89,7 +90,7 @@ export const getCached = async (name, expiryDuration, fn) => {
     window.localStorage.setItem(
       name,
       JSON.stringify({
-        expiry: new Date().getTime() + expiryDuration,
+        expiry: new Date().getTime() + (expiryDuration || cached?.expiry || 60000),
         data,
       })
     );

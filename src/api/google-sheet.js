@@ -21,15 +21,10 @@ export const saveSheetData = (rangesAndValues) => {
   };
   log('saveSheetData', { data });
   log('saveSheetData params', batchParams);
-  return gapi.client.sheets.spreadsheets.values
-    .batchUpdate(batchParams)
-    .then((response) => {
-      const result = response.result;
-      log(
-        `saveSheetData batchUpdate ${result.totalUpdatedCells} cells updated.`,
-        result
-      );
-    });
+  return gapi.client.sheets.spreadsheets.values.batchUpdate(batchParams).then((response) => {
+    const result = response.result;
+    log(`saveSheetData batchUpdate ${result.totalUpdatedCells} cells updated.`, result);
+  });
 };
 
 export const getSheetData = async (ranges) => {
@@ -58,10 +53,7 @@ export const getSheetData = async (ranges) => {
 
 export const getSheetHeaders = async (sheet, r = 1, c = 3) => {
   const colLetter = String.fromCharCode('A'.charCodeAt(0) + c - 1);
-  const result = await getSheetData([
-    `${sheet}!A${r + 1}:${colLetter}`,
-    `${sheet}!1:${r}`,
-  ]);
+  const result = await getSheetData([`${sheet}!A${r + 1}:${colLetter}`, `${sheet}!1:${r}`]);
   if (!result || !result.length) return [];
   const [rows, [columns]] = result;
   return { columns, rows };
@@ -82,9 +74,7 @@ export const appendSheetData = async (range, values) => {
   };
 
   log('appendSheetData params', params, valueRangeBody);
-  return gapi.client.sheets.spreadsheets.values
-    .append(params, valueRangeBody)
-    .then((response) => {
-      log('appendSheetData append updated', response);
-    });
+  return gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody).then((response) => {
+    log('appendSheetData append updated', response);
+  });
 };

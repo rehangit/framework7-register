@@ -33,13 +33,11 @@ export const getUsersProfiles = async () => {
       });
       log('People API Response', response);
 
-      const profiles = response.result.people.map(
-        ({ names, emailAddresses, photos }) => ({
-          name: names[0].displayName,
-          email: emailAddresses[0].value,
-          image: (photos && photos[0].url) || '',
-        })
-      );
+      const profiles = response.result.people.map(({ names, emailAddresses, photos }) => ({
+        name: names[0].displayName,
+        email: emailAddresses[0].value,
+        image: (photos && photos[0].url) || '',
+      }));
       log('getUserProfiles returning profiles', profiles);
       return profiles;
     }
@@ -77,8 +75,7 @@ export const signOut = async (attempt = 0) => {
 };
 
 export const signInWithPrompt = async () =>
-  gapi.auth2.getAuthInstance() &&
-  gapi.auth2.getAuthInstance().signIn({ prompt: 'consent' });
+  gapi.auth2.getAuthInstance() && gapi.auth2.getAuthInstance().signIn({ prompt: 'consent' });
 
 export const isLoggedIn = async () =>
   !!gapi &&

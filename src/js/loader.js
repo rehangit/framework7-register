@@ -8,11 +8,17 @@ const showLoader = (show) => {
   }
 };
 
-export const startLoading = () => {
+export const startLoading = (comments) => {
   loading++;
-  if (loading > 0) showLoader(true);
+  console.log('[loader++]', comments, loading);
+  if (loading > 0) {
+    showLoader(true);
+  }
 };
-export const endLoading = () => {
+export const endLoading = (comments) => {
   loading--;
-  if (loading <= 0) showLoader(false);
+  console.log('[loader--]', comments, loading);
+  if (loading <= 0) {
+    showLoader(false);
+  }
 };

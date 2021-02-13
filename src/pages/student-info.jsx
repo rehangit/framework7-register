@@ -8,8 +8,17 @@ import store from '../js/store';
 
 const StudentInfo = ({ studentId, onClosed }) => {
   const studentInfo = store.state.studentInfo;
-  const { id, fullName, parentName, dateOfBirth, dateOfAdmission, age, image = '' } =
-    studentInfo?.[studentId] || {};
+  const {
+    id,
+    fullName,
+    parentName,
+    dateOfBirth,
+    dateOfAdmission,
+    age,
+    image = '',
+    parentEmail,
+    parentMobile,
+  } = studentInfo?.find(({ id }) => id === studentId) || {};
   console.log('[StudentInfo]: ', { studentInfo, studentId, id, fullName });
 
   const imageSrcSet = image ? `${image} 100w, ${image.replace('s100', 's512')} 512w` : '';
@@ -51,6 +60,14 @@ const StudentInfo = ({ studentId, onClosed }) => {
               <tr>
                 <th>Parent Name</th>
                 <td>{parentName}</td>
+              </tr>
+              <tr>
+                <th>Parent Mobile</th>
+                <td>{parentMobile && parentMobile.toString().padStart(11, '0')}</td>
+              </tr>
+              <tr>
+                <th>Parent Email</th>
+                <td>{parentEmail}</td>
               </tr>
             </tbody>
           </table>

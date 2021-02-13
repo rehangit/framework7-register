@@ -22,3 +22,7 @@
 .card .button i.icon.f7-icons {
   margin-right: 16px;
 }
+
+.card.add-checkin.edit {
+  background-color: #fafcff;
+}

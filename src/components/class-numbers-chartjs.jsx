@@ -13,7 +13,7 @@ export default function ClassNumbersBarChart() {
     console.log('[class-numbers-chartjs]', { students, version });
     const classCounts =
       (students &&
-        Object.values(students).reduce((acc, { class: c }) => {
+        students.reduce((acc, { section: c }) => {
           acc[c] = (acc[c] || 0) + 1;
           return acc;
         }, {})) ||
@@ -47,10 +47,18 @@ export default function ClassNumbersBarChart() {
     ],
   };
 
-  return (
-    <Block strong>
-      <BlockHeader>Number of students per class</BlockHeader>
-      <Bar width={100} height={40} data={data} options={options} />
-    </Block>
-  );
+  return values?.length ? (
+    <div>
+      <Block strong>
+        <BlockHeader>
+          Total number of active students: <strong>{values.reduce((a, b) => a + b, 0)}</strong>
+        </BlockHeader>
+      </Block>
+
+      <Block strong>
+        <BlockHeader>Number of students per class</BlockHeader>
+        <Bar width={100} height={40} data={data} options={options} />
+      </Block>
+    </div>
+  ) : null;
 }
