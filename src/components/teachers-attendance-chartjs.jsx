@@ -1,15 +1,16 @@
 import React from 'react';
-import { Block, BlockHeader } from 'framework7-react';
+import { Block, BlockHeader, Progressbar } from 'framework7-react';
 import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { getCached, logger } from '../js/utils';
+import { getTeachersCheckins } from '../data/sheets';
 const { log } = logger('teachers-attendance-chartjs');
 export default function TeachersAttendanceChart() {
   const [teachersRecords, setTeachersRecords] = React.useState([]);
 
   React.useEffect(() => {
-    getCached('teachers_checkin').then((checkins) => {
+    getCached('teachers_checkin', 1 * 60 * 1000, getTeachersCheckins).then((checkins) => {
       setTeachersRecords(checkins);
     });
   }, []);
@@ -29,8 +30,8 @@ export default function TeachersAttendanceChart() {
           return acc;
         }, {})) ||
       {};
-    const labels = Object.keys(classSets).sort();
-    const values = labels.map((l) => classSets[l].size);
+    const labels = ['B1', 'B2', 'B3', 'B4', 'G1', 'G2', 'G3', 'G4', 'W1', 'W2'];
+    const values = labels.map((l) => classSets[l]?.size || 0);
     return { labels, values, earliest };
   }, [teachersRecords]);
 
@@ -61,9 +62,13 @@ export default function TeachersAttendanceChart() {
   return (
     <Block strong>
       <BlockHeader>
-        Teachers updates since: {(earliest && new Date(earliest).toLocaleDateString()) || '...'}
+        Teachers updates {earliest ? `since ${new Date(earliest).toLocaleDateString()}` : '...'}
       </BlockHeader>
-      <Bar width={100} height={40} data={data} options={options} />
+      {values && values.length ? (
+        <Bar width={100} height={40} data={data} options={options} />
+      ) : (
+        <Progressbar infinite color="multi" />
+      )}
     </Block>
   );
 }

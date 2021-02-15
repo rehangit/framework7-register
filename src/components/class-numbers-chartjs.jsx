@@ -1,5 +1,5 @@
 import React from 'react';
-import { Block, BlockHeader, useStore } from 'framework7-react';
+import { Block, BlockHeader, Progressbar, useStore } from 'framework7-react';
 import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -47,7 +47,7 @@ export default function ClassNumbersBarChart() {
     ],
   };
 
-  return values?.length ? (
+  return (
     <div>
       <Block strong>
         <BlockHeader>
@@ -57,8 +57,12 @@ export default function ClassNumbersBarChart() {
 
       <Block strong>
         <BlockHeader>Number of students per class</BlockHeader>
-        <Bar width={100} height={40} data={data} options={options} />
+        {values?.length ? (
+          <Bar width={100} height={40} data={data} options={options} />
+        ) : (
+          <Progressbar infinite color="multi" />
+        )}
       </Block>
     </div>
-  ) : null;
+  );
 }

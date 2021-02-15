@@ -19,7 +19,9 @@ import A2HS from './a2hs';
 
 import '../css/app.css';
 
-const VERSION = '1.0.4';
+import packageJson from '../../package.json';
+
+const VERSION = packageJson.version;
 
 const app = () => {
   const f7params = {

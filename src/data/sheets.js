@@ -40,7 +40,7 @@ export const getActiveStudents = async () => {
 
 export const writeTeacherCheckIn = async ({ name, date, time, section, type, username }) => {
   const timestamp = timestampToSerial(new Date());
-  const row = [timestamp, date, section, name, type, time, username];
+  const row = [timestamp, name, date, section, type, time, username];
   return appendSheetData('TEACHER_ATTENDANCE_DATA', [row]);
 };
 

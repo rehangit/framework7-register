@@ -206,10 +206,25 @@ module.exports = {
           from: resolvePath('src/manifest.json'),
           to: resolvePath('www/manifest.json'),
         },
+        ...(env === 'development'
+          ? [
+              {
+                noErrorOnMissing: true,
+                from: resolvePath('src/sw.js'),
+                to: resolvePath('www/sw.js'),
+              },
+            ]
+          : []),
       ],
     }),
-    new GenerateSW({
-      swDest: 'sw.js',
-    }),
+    ...(env === 'production'
+      ? [
+          new GenerateSW({
+            swDest: 'sw.js',
+          }),
+        ]
+      : [
+          // Development only plugins
+        ]),
   ],
 };
