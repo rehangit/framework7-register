@@ -40,6 +40,7 @@ export default function CheckinForm({ onUpdate, checkin }) {
   }, []);
 
   React.useEffect(() => {
+    log('useEffect on [checkin]', checkin);
     setValues(checkin);
   }, [checkin]);
 
@@ -67,13 +68,15 @@ export default function CheckinForm({ onUpdate, checkin }) {
             loginScreenOpen="#the-login-screen"
             readonly
             value={values.name || ''}
+            disabled={!!values.type}
           />
           <ListInput
             label="Class"
             type="select"
             placeholder="Please select your class"
             name="section"
-            value={values.section || storedSection || ''}
+            initialValue={values.section || storedSection || ''}
+            disabled={!!values.type}
           >
             {['B1', 'B2', 'B3', 'B4', 'G1', 'G2', 'G3', 'G4', 'W1', 'W2'].map((c) => (
               <option key={c} value={c}>
@@ -89,6 +92,7 @@ export default function CheckinForm({ onUpdate, checkin }) {
             name="date"
             value={[values.date || new Date()]}
             calendarParams={calendarParams}
+            disabled={!!values.type}
           />
           <ListInput
             label="Time:"

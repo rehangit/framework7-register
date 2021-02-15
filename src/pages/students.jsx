@@ -29,7 +29,7 @@ const calendarParams = {
   backdrop: true,
 };
 
-import { readStudentRegister, getActiveStudents, writeStudentRegister } from '../data/sheets';
+import { readStudentRegister, writeStudentRegister } from '../data/sheets';
 import { logger } from '../js/utils';
 import { startLoading, endLoading } from '../js/loader';
 import MainNav from '../components/main-nav';
@@ -128,8 +128,9 @@ export default () => {
   const onChange = useCallback(
     (value, id) => {
       const setStudentValue = (student) => {
+        const skipAbsent = scoreType !== 'Attendance' && student.Attendance?.value === 'A';
         student[scoreType] = student[scoreType] || {};
-        student[scoreType].value = value;
+        if (!skipAbsent) student[scoreType].value = value;
       };
 
       log('main.jsx > onChange', { value, id, scoreType, selectedSection });

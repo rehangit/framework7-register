@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import 'framework7-icons';
 
 import '../css/score-tab.css';
@@ -6,7 +6,6 @@ import '../css/score-tab.css';
 import { ListItem, List, Icon, Tab } from 'framework7-react';
 
 import StateGroupButtons from './state-group';
-import store from '../js/store';
 
 export default function ScoreTab({
   type,
@@ -15,13 +14,16 @@ export default function ScoreTab({
   scoreLabels,
   onChange,
   selectedStudents,
-  selectedSection,
   onStudentInfo,
 }) {
   const [sortAsc, setSortAsc] = React.useState(true);
-  const sortFn = sortAsc
-    ? (a, b) => (a.name < b.name ? -1 : 1)
-    : (a, b) => (a.name > b.name ? -1 : 1);
+  const sortFn = useMemo(
+    () =>
+      sortAsc
+        ? (a, b) => (a.fullName < b.fullName ? -1 : 1)
+        : (a, b) => (a.fullName > b.fullName ? -1 : 1),
+    [sortAsc]
+  );
   return (
     <Tab id={type} onTabShow={({ id }) => setScoreType(id)} tabActive={scoreType === type}>
       <List>
@@ -32,15 +34,18 @@ export default function ScoreTab({
           </div>
           <StateGroupButtons labels={scoreLabels} slot="after" header={true} onChange={onChange} />
         </ListItem>
-        {selectedStudents.sort(sortFn).map(({ id, fullName, image, [scoreType]: score }) => {
+        {selectedStudents.sort(sortFn).map(({ id, fullName, image, ...rest }) => {
+          const score = rest[scoreType];
+          const attendance = rest.Attendance;
           const { value, orig } = score || {};
-          console.log('[score-tab]: redenring score tab for', {
-            id,
-            fullName,
-            [scoreType]: score,
-          });
+          const disabled = score !== attendance && attendance.value && attendance.value === 'A';
+          console.log('[score-tab] rendering', fullName, attendance, disabled);
           return (
-            <ListItem key={id} style={{ opacity: 1, transition: 'all 1s ease' }}>
+            <ListItem
+              key={id}
+              style={{ opacity: 1, transition: 'all 1s ease' }}
+              disabled={disabled}
+            >
               <div
                 className="title"
                 slot="title"
