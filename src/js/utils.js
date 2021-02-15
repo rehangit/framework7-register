@@ -90,7 +90,7 @@ export const getCached = async (name, expiryDuration, fn) => {
     window.localStorage.setItem(
       name,
       JSON.stringify({
-        expiry: new Date().getTime() + (expiryDuration || cached?.expiry || 60000),
+        expiry: cached?.expiry || new Date().getTime() + (expiryDuration || 60000),
         data,
       })
     );

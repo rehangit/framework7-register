@@ -39,7 +39,7 @@ export default function ScoreTab({
           const attendance = rest.Attendance;
           const { value, orig } = score || {};
           const disabled = score !== attendance && attendance.value && attendance.value === 'A';
-          console.log('[score-tab] rendering', fullName, attendance, disabled);
+          //console.log('[score-tab] rendering', fullName, attendance, disabled);
           return (
             <ListItem
               key={id}

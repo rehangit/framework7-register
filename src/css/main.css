@@ -50,35 +50,3 @@ table.student-info tr td {
 table.student-info tr th {
   text-align: left;
 }
-
-table.teachers-updates-table {
-  text-align: center;  
-  border-collapse: collapse;
-  width: 100%;
-}
-
-table.teachers-updates-table {
-  border: 1px solid rgba(10,10,10,1)
-}
-table.teachers-updates-table tr td,
-table.teachers-updates-table tr th {
-  border: 1px solid rgba(100,100,100,0.1)
-}
-
-table.teachers-updates-table tr th:first-child,
-table.teachers-updates-table tr td:first-child {
-  text-align: left;
-  padding: 2px 4px;
-}
-
-table.teachers-updates-table tr td[data-count="0"] {
-  color: red;
-}
-
-table.teachers-updates-table tr td[data-count="1"] {
-  background-color: orange;
-}
-
-table.teachers-updates-table tr td[data-count="2"] {
-  background-color: lightgreen;
-}

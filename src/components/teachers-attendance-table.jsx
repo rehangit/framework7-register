@@ -1,5 +1,5 @@
 import React from 'react';
-import { Block, BlockHeader, Icon } from 'framework7-react';
+import { Block, BlockFooter, BlockTitle, Icon } from 'framework7-react';
 
 import { logger } from '../js/utils';
 const { log } = logger('teachers-attendance-chartjs');
@@ -25,8 +25,8 @@ export default function TeachersAttendanceChart({ checkins: teachersRecords }) {
     const groups = teachersRecords.reduce((acc, g) => {
       const { date, section } = g;
       acc[date] = acc[date] || {};
-      acc[date][section] = acc[date][section] || '';
-      acc[date][section] = acc[date][section] + g.type;
+      acc[date][section] = acc[date][section] || new Set();
+      acc[date][section].add(g.type);
       return acc;
     }, {});
     log('nested', groups);
@@ -43,7 +43,7 @@ export default function TeachersAttendanceChart({ checkins: teachersRecords }) {
   log('teachers records groupby', { dateRange, dates, data });
   return (
     <Block strong>
-      <BlockHeader>Teachers Attendance Summary ...</BlockHeader>
+      <BlockTitle>Updates Summary</BlockTitle>
       <table className="teachers-updates-table">
         <thead>
           <tr>
@@ -60,7 +60,7 @@ export default function TeachersAttendanceChart({ checkins: teachersRecords }) {
               </td>
               {sections.map((s) => {
                 const values = data?.[d.toISOString().slice(0, 10)];
-                const value = values?.[s];
+                const value = Array.from(values?.[s] || {});
                 const count = value?.length || 0;
                 const icon =
                   {
@@ -68,9 +68,11 @@ export default function TeachersAttendanceChart({ checkins: teachersRecords }) {
                     End: 'arrow_down',
                     StartEnd: 'arrow_up_arrow_down',
                     EndStart: 'arrow_up_arrow_down',
-                  }[value] ||
+                  }[value?.join('')] ||
                   (values && sectionDays[s].includes(d.getDay()) && 'xmark') ||
                   '';
+
+                //log('rendering cell', d, s, { values, value, count });
                 return (
                   <td data-count={count} key={s}>
                     <Icon f7={icon} size="small"></Icon>
@@ -79,6 +81,35 @@ export default function TeachersAttendanceChart({ checkins: teachersRecords }) {
               })}
             </tr>
           ))}
+        </tbody>
+      </table>
+      <BlockFooter>Legend:</BlockFooter>
+      <table width="100%">
+        <tbody>
+          <tr>
+            <td>
+              <Icon f7="arrow_up" style={{ color: 'orange' }} size="small" />
+            </td>
+            <td>Received update for the Start of class</td>
+          </tr>
+          <tr>
+            <td>
+              <Icon f7="arrow_down" style={{ color: 'orange' }} size="small" />
+            </td>
+            <td>Received update for the End of class</td>
+          </tr>
+          <tr>
+            <td>
+              <Icon f7="arrow_up_arrow_down" style={{ color: 'green' }} size="small" />
+            </td>
+            <td>Received update for both Start and End</td>
+          </tr>
+          <tr>
+            <td>
+              <Icon f7="xmark" color="red" size="small" />
+            </td>
+            <td>Update was expected but not received</td>
+          </tr>
         </tbody>
       </table>
     </Block>

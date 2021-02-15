@@ -34,3 +34,41 @@
 .card.add-checkin .card-header {
   margin-bottom: 10px;
 } 
+
+
+table.teachers-updates-table {
+  text-align: center;  
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.teachers-updates-table {
+  border: 1px solid rgba(10,10,10,1)
+}
+table.teachers-updates-table tr td,
+table.teachers-updates-table tr th {
+  border: 1px solid rgba(100,100,100,0.1)
+}
+
+table.teachers-updates-table tr th:first-child,
+table.teachers-updates-table tr td:first-child {
+  text-align: left;
+  padding: 2px 4px;
+}
+
+table.teachers-updates-table tr td[data-count="0"] {
+  color: red;
+}
+
+table.teachers-updates-table tr td[data-count="1"] {
+  color: orange;
+}
+
+table.teachers-updates-table tr td[data-count="2"] {
+  color: green;
+}
+
+table.teachers-updates-table tr th,
+table.teachers-updates-table tr td {
+  padding: 3px 2px;
+}
