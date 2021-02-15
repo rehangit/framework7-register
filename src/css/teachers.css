@@ -26,3 +26,11 @@
 .card.add-checkin.edit {
   background-color: #fafcff;
 }
+
+.card.add-checkin form.list li .item-inner  {
+  padding-top: 0;
+}
+
+.card.add-checkin .card-header {
+  margin-bottom: 10px;
+} 

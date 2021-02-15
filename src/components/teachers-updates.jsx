@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { List, ListItem, BlockTitle, Icon, Badge, Tab, useStore, f7 } from 'framework7-react';
 
 import CheckinForm from '../components/checkin';
@@ -8,17 +8,15 @@ const { log } = logger('teachers-updates');
 
 export default function TeachersUpdates({ newUpdate, checkins, onUpdate }) {
   const user = useStore('user');
-  const [userName, setUserName] = useState('');
+  const userName = useMemo(() => user?.email.split('@')[0], [user]);
 
   const defaultCheckin = useCallback(() => {
-    const un = user?.email.split('@')[0];
-    setUserName(un);
     return {
       name: user?.name,
       date: new Date().toISOString().slice(0, 10),
       type: '',
       time: new Date().toLocaleTimeString(),
-      username: un,
+      username: userName || user?.email.split('@')[0] || '',
     };
   }, [user]);
 
@@ -33,10 +31,6 @@ export default function TeachersUpdates({ newUpdate, checkins, onUpdate }) {
 
   useEffect(() => {
     if (newUpdate === 0) return;
-    // log('new update', newUpdate);
-    // setCheckin(defaultCheckin());
-    // f7.input.scrollIntoView('#top-of-the-list', 200, false, true);
-    // // f7.fab.open('.add-start-end');
     onEdit(defaultCheckin());
   }, [newUpdate]);
 
