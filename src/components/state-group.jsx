@@ -11,15 +11,14 @@ export default function StateGroup({ labels, onChange, value, slot, header, isDi
         <Button
           key={i}
           active={(value !== undefined && value.toString() === label) || header}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+          onClick={() => {
             const onchangeParam =
               value !== undefined && value.toString() === label ? undefined : label;
             onChange(onchangeParam);
           }}
           className={`label-${label}`}
           text={label}
+          href="false"
         />
       ))}
     </Segmented>
