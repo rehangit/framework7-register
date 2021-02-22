@@ -149,34 +149,41 @@ export default () => {
 
   const onSave = useCallback(() => {
     if (!modified) return;
-    startLoading('on save');
     const date = selectedDate;
-    const modifiedStudents = selectedStudents.filter(
+    let modifiedStudents = selectedStudents.filter(
       (s) => s[scoreType] && s[scoreType].value !== s[scoreType].orig
     );
     log('saving data:', { scoreType, date, selectedSection, modifiedStudents });
-    writeStudentRegister({
-      students: modifiedStudents,
-      date,
-      section: selectedSection,
-      type: scoreType,
-      user: user.email.split('@')[0],
-    })
-      .then(() => {
-        modifiedStudents.forEach((s) => {
-          s[scoreType].orig = s[scoreType].value;
-        });
-        setSelectedStudents([...selectedStudents]);
-      })
-      .catch((err) => {
-        console.error(
-          'Error saving data',
-          { scoreType, selectedDate, selectedSection, selectedStudents },
-          err
+    if (modifiedStudents.length) {
+      startLoading('on save');
+      if (scoreType !== 'Attendance') {
+        modifiedStudents = modifiedStudents.filter(
+          (s) => s.Attendance && s.Attendance.value !== 'A'
         );
-        store.dispatch('setError', err);
+      }
+      writeStudentRegister({
+        students: modifiedStudents,
+        date,
+        section: selectedSection,
+        type: scoreType,
+        user: user.email.split('@')[0],
       })
-      .finally(() => endLoading('on save'));
+        .then(() => {
+          modifiedStudents.forEach((s) => {
+            s[scoreType].orig = s[scoreType].value;
+          });
+          setSelectedStudents([...selectedStudents]);
+        })
+        .catch((err) => {
+          console.error(
+            'Error saving data',
+            { scoreType, selectedDate, selectedSection, selectedStudents },
+            err
+          );
+          store.dispatch('setError', err);
+        })
+        .finally(() => endLoading('on save'));
+    }
   }, [selectedDate, selectedStudents, modified]);
 
   const onCancel = useCallback(() => {
