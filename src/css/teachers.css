@@ -11,12 +11,20 @@
   font-size: x-small;
 }
 
+.list .media-item[data-today='true'] {
+  background: aliceblue;
+}
+
 .fab.fab-morph.fab-opened {
   z-index: -10;
 }
 
 .card .button {
   min-width: 120px;
+}
+
+.card .button[type='submit'] {
+  max-width: 30%;
 }
 
 .card .button i.icon.f7-icons {
@@ -27,27 +35,26 @@
   background-color: #fafcff;
 }
 
-.card.add-checkin form.list li .item-inner  {
+.card.add-checkin form.list li .item-inner {
   padding-top: 0;
 }
 
 .card.add-checkin .card-header {
   margin-bottom: 10px;
-} 
-
+}
 
 table.teachers-updates-table {
-  text-align: center;  
+  text-align: center;
   border-collapse: collapse;
   width: 100%;
 }
 
 table.teachers-updates-table {
-  border: 1px solid rgba(10,10,10,1)
+  border: 1px solid rgba(10, 10, 10, 1);
 }
 table.teachers-updates-table tr td,
 table.teachers-updates-table tr th {
-  border: 1px solid rgba(100,100,100,0.1)
+  border: 1px solid rgba(100, 100, 100, 0.1);
 }
 
 table.teachers-updates-table tr th:first-child,
@@ -56,19 +63,46 @@ table.teachers-updates-table tr td:first-child {
   padding: 2px 4px;
 }
 
-table.teachers-updates-table tr td[data-count="0"] {
+table.teachers-updates-table tr td[data-count='0'] {
   color: red;
 }
 
-table.teachers-updates-table tr td[data-count="1"] {
+table.teachers-updates-table tr td[data-count='1'] {
   color: orange;
 }
 
-table.teachers-updates-table tr td[data-count="2"] {
+table.teachers-updates-table tr td[data-count='2'] {
   color: green;
 }
 
 table.teachers-updates-table tr th,
 table.teachers-updates-table tr td {
   padding: 3px 2px;
+}
+
+.per-class.list.media-list li .section {
+  background: gray;
+  color: white;
+  border-radius: 2em;
+  font-size: larger;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+}
+
+.per-class.list.media-list li .item-after .badge i.icon {
+  vertical-align: bottom;
+  margin-right: 6px;
+}
+
+.per-class.list.media-list li.list-group-title.today {
+  background-color: aliceblue;
+  font-weight: bold;
+}
+
+.per-class.list.media-list li.list-group-title.today span::after {
+  content: 'Today';
+  color: lightgray;
+  margin-left: 6px;
 }

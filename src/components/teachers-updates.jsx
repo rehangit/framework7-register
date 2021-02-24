@@ -35,7 +35,7 @@ export default function TeachersUpdates({ newUpdate, checkins, onUpdate }) {
   }, [newUpdate]);
 
   return (
-    <Tab id="Updates" tabActive>
+    <div>
       <BlockTitle id="top-of-the-list">Recent updates</BlockTitle>
       <List mediaList>
         <CheckinForm
@@ -54,9 +54,10 @@ export default function TeachersUpdates({ newUpdate, checkins, onUpdate }) {
                 key={i}
                 badgeColor={color}
                 title={ci.name}
-                subtitle={`${ci.type === 'Start' ? 'Started' : 'Finished'} class: ${ci.section}`}
-                text={ci.timestamp.toLocaleString()}
+                subtitle={`${ci.type === 'Start' ? 'Started' : 'Ended'} class: ${ci.section}`}
+                text={new Date(ci.timestamp).toLocaleString()}
                 onClick={ci.username === userName ? () => onEdit(ci) : null}
+                data-today={new Date(ci.date).toDateString() === new Date().toDateString()}
               >
                 <Icon f7={icon} slot="media" size="48" color={color} />
                 <div slot="after" style={{ position: 'absolute', right: 0, top: 0 }}>
@@ -67,6 +68,6 @@ export default function TeachersUpdates({ newUpdate, checkins, onUpdate }) {
             );
           })}
       </List>
-    </Tab>
+    </div>
   );
 }

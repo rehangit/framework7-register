@@ -8,8 +8,8 @@ export default function Menu({}) {
   return (
     <Panel left cover>
       <Navbar title={f7.name} subtitle={f7.version} />
-      <List>
-        <SignInProfile />
+      <SignInProfile />
+      <List menuList>
         <ListItem link="/" title="Dashboard" panelClose />
         <ListItem link="/students/" title="Students" panelClose />
         <ListItem link="/teachers/" title="Teachers" panelClose />

@@ -21,6 +21,7 @@ const store = createStore({
     error: null,
     userVersion: 0,
     studentInfoVersion: 0,
+    sections: [],
   },
   actions: {
     async updateUser({ state }) {
@@ -35,6 +36,9 @@ const store = createStore({
         state.studentInfo = info
           .filter(({ active }) => active)
           .map(({ section: type, class: section, ...fields }) => ({ ...fields, section, type }));
+        state.sections = Array.from(
+          state.studentInfo.reduce((acc, { section }) => acc.add(section), new Set())
+        ).sort();
 
         const profiles = (await getProfiles()) || [];
         profiles.forEach(({ email, image }) => {
@@ -67,6 +71,9 @@ const store = createStore({
     },
     error({ state }) {
       return state.error;
+    },
+    sections({ state }) {
+      return state.sections;
     },
   },
 });

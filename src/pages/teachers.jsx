@@ -11,6 +11,7 @@ import { getCached } from '../js/utils';
 import { getTeachersCheckins, writeTeacherCheckIn } from '../data/sheets';
 
 import { logger } from '../js/utils';
+import TeachersUpdatesPerClass from '../components/teachers-updates-per-class';
 const { log } = logger('teachers');
 
 export default function TeachersCheckins() {
@@ -28,7 +29,7 @@ export default function TeachersCheckins() {
     populate(false);
   }, []);
 
-  const onUpdate = useCallback(({ name, date, time, section, type, username }) => {
+  const onUpdate = useCallback(({ name, date, time, section, type, username, id }) => {
     startLoading('teachers on update');
     const data = {
       name,
@@ -37,6 +38,7 @@ export default function TeachersCheckins() {
       section,
       type,
       username,
+      id,
     };
     log('onUpdate submitting checkin', data);
     writeTeacherCheckIn(data)
@@ -66,11 +68,17 @@ export default function TeachersCheckins() {
       </Fab>
 
       <Toolbar tabbar bottom>
+        <Link tabLink="#PerClass">Classes</Link>
         <Link tabLink="#Updates">Updates</Link>
         <Link tabLink="#Overview">Overview</Link>
       </Toolbar>
       <Tabs>
-        <TeachersUpdates newUpdate={newUpdate} checkins={checkins} onUpdate={onUpdate} />
+        <Tab id="PerClass" tabActive>
+          <TeachersUpdatesPerClass checkins={checkins} />
+        </Tab>
+        <Tab id="Updates">
+          <TeachersUpdates newUpdate={newUpdate} checkins={checkins} onUpdate={onUpdate} />
+        </Tab>
         <Tab id="Overview">
           <TeachersAttendanceTable checkins={checkins} />
         </Tab>

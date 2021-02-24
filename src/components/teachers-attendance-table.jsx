@@ -1,12 +1,11 @@
 import React from 'react';
-import { Block, BlockFooter, BlockTitle, Icon } from 'framework7-react';
+import { Block, BlockFooter, BlockTitle, Icon, useStore } from 'framework7-react';
 
 import { logger } from '../js/utils';
 const { log } = logger('teachers-attendance-chartjs');
 
 const nextDate = (d) => new Date(d.valueOf() + 24 * 3600 * 1000);
 
-const sections = ['B1', 'B2', 'B3', 'B4', 'G1', 'G2', 'G3', 'G4', 'W1', 'W2'];
 const sectionDays = {
   B1: '1234',
   B2: '1234',
@@ -20,6 +19,7 @@ const sectionDays = {
   W2: '60',
 };
 export default function TeachersAttendanceChart({ checkins: teachersRecords }) {
+  const sections = useStore('sections');
   const data = React.useMemo(() => {
     if (!teachersRecords || !teachersRecords.length) return {};
     const groups = teachersRecords.reduce((acc, g) => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Block, BlockHeader, Progressbar } from 'framework7-react';
+import { Block, BlockHeader, Progressbar, useStore } from 'framework7-react';
 import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -8,6 +8,7 @@ import { getTeachersCheckins } from '../data/sheets';
 const { log } = logger('teachers-attendance-chartjs');
 export default function TeachersAttendanceChart() {
   const [teachersRecords, setTeachersRecords] = React.useState([]);
+  const sections = useStore('sections');
 
   React.useEffect(() => {
     getCached('teachers_checkin', 1 * 60 * 1000, getTeachersCheckins).then((checkins) => {
@@ -30,10 +31,10 @@ export default function TeachersAttendanceChart() {
           return acc;
         }, {})) ||
       {};
-    const labels = ['B1', 'B2', 'B3', 'B4', 'G1', 'G2', 'G3', 'G4', 'W1', 'W2'];
+    const labels = sections;
     const values = labels.map((l) => classSets[l]?.size || 0);
     return { labels, values, earliest };
-  }, [teachersRecords]);
+  }, [teachersRecords, sections]);
 
   log('chartjs labels and values', { labels, values, length: teachersRecords?.length });
   const colors = {

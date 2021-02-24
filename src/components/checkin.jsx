@@ -9,6 +9,7 @@ import {
   Button,
   Link,
   ListInput,
+  useStore,
 } from 'framework7-react';
 
 import { logger } from '../js/utils';
@@ -26,12 +27,17 @@ const calendarParams = {
 
 export default function CheckinForm({ onUpdate, checkin }) {
   const submitCheckIn = (type) => (e) => {
-    console.log('submit checkin event', e);
+    const validityResponse = f7.el.querySelector('#CheckInCard').checkValidity();
+    console.log('submit checkin event', { e, validityResponse });
+    if (!validityResponse) return;
+
     const formData = f7.form.convertToData('#CheckInCard');
-    return onUpdate({ ...formData, type });
+    onUpdate({ ...formData, type });
+    f7.fab.close('.add-start-end');
   };
 
   const [values, setValues] = React.useState(checkin);
+  const sections = useStore('sections');
   const [storedSection, setStoredSection] = React.useState('');
 
   React.useEffect(() => {
@@ -75,10 +81,13 @@ export default function CheckinForm({ onUpdate, checkin }) {
             type="select"
             placeholder="Please select your class"
             name="section"
-            initialValue={values.section || storedSection || ''}
+            initialValue={storedSection || ''}
             disabled={!!values.type}
+            required
+            validate
+            pattern={sections.join('|')}
           >
-            {['B1', 'B2', 'B3', 'B4', 'G1', 'G2', 'G3', 'G4', 'W1', 'W2'].map((c) => (
+            {['', ...sections].map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
@@ -111,18 +120,18 @@ export default function CheckinForm({ onUpdate, checkin }) {
         <Button
           fill
           iconF7="arrow_up_circle_fill"
-          className="fab-close"
           onClick={submitCheckIn('Start')}
           disabled={values.type && !values.type.includes('Start')}
+          type="submit"
         >
           Start
         </Button>
         <Button
           fill
           iconF7="arrow_down_circle_fill"
-          className="fab-close"
           onClick={submitCheckIn('End')}
           disabled={values.type && !values.type.includes('End')}
+          type="submit"
         >
           End
         </Button>
