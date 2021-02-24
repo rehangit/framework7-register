@@ -36,8 +36,8 @@ export default function TeachersUpdatesPerClass({ checkins }) {
               const sectionUpdate = perDate?.[d]?.[section];
               const start = sectionUpdate?.Start || [];
               const end = sectionUpdate?.End || [];
-              const startTitle = start.length > 0 ? `Started by ${start[0].name}` : '';
-              const endTitle = end.length > 0 ? `Ended by ${start[0].name}` : '';
+              const startTitle = start?.length > 0 ? `Started by ${start?.[0]?.name}` : '';
+              const endTitle = end?.length > 0 ? `Ended by ${start?.[0]?.name}` : '';
               const color = {
                 B: 'dodgerblue',
                 G: 'indianred',
