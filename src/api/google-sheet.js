@@ -51,14 +51,6 @@ export const getSheetData = async (ranges) => {
     .catch(() => []);
 };
 
-export const getSheetHeaders = async (sheet, r = 1, c = 3) => {
-  const colLetter = String.fromCharCode('A'.charCodeAt(0) + c - 1);
-  const result = await getSheetData([`${sheet}!A${r + 1}:${colLetter}`, `${sheet}!1:${r}`]);
-  if (!result || !result.length) return [];
-  const [rows, [columns]] = result;
-  return { columns, rows };
-};
-
 export const appendSheetData = async (range, values) => {
   const params = {
     spreadsheetId: SPREADSHEET_ID,

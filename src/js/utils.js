@@ -99,3 +99,8 @@ export const getCached = async (name, expiryDuration, fn) => {
   }
   return data;
 };
+
+export const purgeCache = async (name) => {
+  if (!name) return;
+  window.localStorage.setItem(name, JSON.stringify({ expiry: 0, data: null }));
+};

@@ -1,8 +1,8 @@
-.list .media-item .item-after .badge {
+#Updates .list .media-item .item-after .badge {
   font-size: larger;
   padding: 0.2em 0.8em;
   display: block;
-  margin: 0.1em 0;
+  margin: 0em 0;
   line-height: 1;
   height: 1.4em;
 }
@@ -91,8 +91,16 @@ table.teachers-updates-table tr td {
   text-align: center;
 }
 
+.per-class.list.media-list li .item-after .badge {
+  display: block;
+  margin: 0.2em;
+  line-height: 1.5em;
+  height: 1.5em;
+  z-index: 100;
+}
+
 .per-class.list.media-list li .item-after .badge i.icon {
-  vertical-align: bottom;
+  vertical-align: text-top;
   margin-right: 6px;
 }
 
@@ -105,4 +113,14 @@ table.teachers-updates-table tr td {
   content: 'Today';
   color: lightgray;
   margin-left: 6px;
+}
+
+.per-class.list.media-list li .item-subtitle div[slot='subtitle'] {
+  background-color: rgba(200, 240, 200, 0.6);
+  padding: 0 6px;
+  border-radius: 20px;
+}
+
+.per-class.list.media-list li .item-subtitle div[slot='subtitle'] + div[slot='subtitle'] {
+  margin-top: 0.1em;
 }

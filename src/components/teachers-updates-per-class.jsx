@@ -34,10 +34,10 @@ export default function TeachersUpdatesPerClass({ checkins }) {
             <ListItem title={date} groupTitle className={isToday ? 'today' : ''} />
             {sections.map((section) => {
               const sectionUpdate = perDate?.[d]?.[section];
-              const start = sectionUpdate?.Start || [];
-              const end = sectionUpdate?.End || [];
-              const startTitle = start?.length > 0 ? `Started by ${start?.[0]?.name}` : '';
-              const endTitle = end?.length > 0 ? `Ended by ${start?.[0]?.name}` : '';
+              const start = sectionUpdate?.Start?.[0];
+              const end = sectionUpdate?.End?.[0];
+              const startTitle = start && `Started by ${start?.name}`;
+              const endTitle = end && `Ended by ${end?.name}`;
               const color = {
                 B: 'dodgerblue',
                 G: 'indianred',
@@ -48,19 +48,19 @@ export default function TeachersUpdatesPerClass({ checkins }) {
                   <div className="section" slot="media" style={{ backgroundColor: color }}>
                     {section}
                   </div>
-                  <div slot="title">{startTitle}</div>
-                  <div slot="title">{endTitle}</div>
+                  <div slot="subtitle">{startTitle}</div>
+                  <div slot="subtitle">{endTitle}</div>
                   <div slot="after" style={{ position: 'absolute', right: 0, top: 0 }}>
-                    {start?.[0]?.time ? (
+                    {start?.time ? (
                       <Badge>
                         <Icon f7="arrow_up_circle_fill" size="medium" />
-                        {start?.[0]?.time?.slice(0, 5)}
+                        {start?.time?.slice(0, 5)}
                       </Badge>
                     ) : null}
-                    {end?.[0]?.time ? (
+                    {end?.time ? (
                       <Badge>
                         <Icon f7="arrow_down_circle_fill" size="medium" />
-                        {end?.[0]?.time?.slice(0, 5)}
+                        {end?.time?.slice(0, 5)}
                       </Badge>
                     ) : null}
                   </div>
