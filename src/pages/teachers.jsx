@@ -3,11 +3,11 @@ import { Navbar, Page, Tabs, Toolbar, Link, Tab, Fab, Icon, f7 } from 'framework
 
 import '../css/teachers.css';
 
-import MainNav from '../components/main-nav';
+import { LeftNav, RightNav } from '../components/main-nav';
 import TeachersUpdates from '../components/teachers-updates';
 import TeachersAttendanceTable from '../components/teachers-attendance-table';
 import { endLoading, startLoading } from '../js/loader';
-import { getCached } from '../js/utils';
+import { getCached, purgeCache } from '../js/utils';
 import { getTeachersCheckins, writeTeacherCheckIn } from '../data/sheets';
 
 import { logger } from '../js/utils';
@@ -43,6 +43,7 @@ export default function TeachersCheckins() {
     log('onUpdate submitting checkin', data);
     writeTeacherCheckIn(data)
       .then(() => {
+        purgeCache('teachers_checkin');
         populate(true);
       })
       .finally(() => endLoading('teachers on update'));
@@ -51,7 +52,8 @@ export default function TeachersCheckins() {
   return (
     <Page name="teachers">
       <Navbar>
-        <MainNav title="Teachers" />
+        <LeftNav title="Teachers" />
+        <RightNav />
       </Navbar>
       <Fab
         className="add-start-end"
@@ -77,7 +79,12 @@ export default function TeachersCheckins() {
           <TeachersUpdatesPerClass checkins={checkins} />
         </Tab>
         <Tab id="Updates">
-          <TeachersUpdates newUpdate={newUpdate} checkins={checkins} onUpdate={onUpdate} />
+          <TeachersUpdates
+            newUpdate={newUpdate}
+            checkins={checkins}
+            onUpdate={onUpdate}
+            onDelete={(data) => onUpdate({ ...data, type: 'Deleted' })}
+          />
         </Tab>
         <Tab id="Overview">
           <TeachersAttendanceTable checkins={checkins} />

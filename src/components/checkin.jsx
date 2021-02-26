@@ -32,7 +32,7 @@ export default function CheckinForm({ onUpdate, checkin }) {
     if (!validityResponse) return;
 
     const formData = f7.form.convertToData('#CheckInCard');
-    onUpdate({ ...formData, type });
+    onUpdate({ ...values, ...formData, type });
     f7.fab.close('.add-start-end');
   };
 
@@ -43,6 +43,9 @@ export default function CheckinForm({ onUpdate, checkin }) {
   React.useEffect(() => {
     const section = localStorage.getItem('selectedSection');
     setStoredSection(section);
+    if (!values.section) {
+      setValues({ ...values, section });
+    }
   }, []);
 
   React.useEffect(() => {
@@ -74,20 +77,25 @@ export default function CheckinForm({ onUpdate, checkin }) {
             loginScreenOpen="#the-login-screen"
             readonly
             value={values.name || ''}
-            disabled={!!values.type}
           />
           <ListInput
             label="Class"
             type="select"
             placeholder="Please select your class"
             name="section"
-            initialValue={storedSection || ''}
-            disabled={!!values.type}
+            value={values.section || storedSection || ''}
             required
             validate
             pattern={sections.join('|')}
+            onChange={(e) => {
+              log('checkin form list input for Class onChange called', {
+                values,
+                new: e.target.value,
+              });
+              setValues({ ...values, section: e.target.value });
+            }}
           >
-            {['', ...sections].map((c) => (
+            {[...sections].map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
@@ -101,38 +109,28 @@ export default function CheckinForm({ onUpdate, checkin }) {
             name="date"
             value={[values.date || new Date()]}
             calendarParams={calendarParams}
-            disabled={!!values.type}
           />
           <ListInput
             label="Time:"
             type="time"
             placeholder="Please choose..."
             name="time"
-            value={values.time || ''}
+            value={(values.time || '').toString().slice(0, 5)}
             onChange={(e) => {
-              log('onChange called', { values });
+              log('checkin form list input for Time onChange called', {
+                values,
+                new: e.target.value,
+              });
               setValues({ ...values, time: e.target.value });
             }}
           />
         </List>
       </CardContent>
       <CardFooter>
-        <Button
-          fill
-          iconF7="arrow_up_circle_fill"
-          onClick={submitCheckIn('Start')}
-          disabled={values.type && !values.type.includes('Start')}
-          type="submit"
-        >
+        <Button fill iconF7="arrow_up_circle_fill" onClick={submitCheckIn('Start')} type="submit">
           Start
         </Button>
-        <Button
-          fill
-          iconF7="arrow_down_circle_fill"
-          onClick={submitCheckIn('End')}
-          disabled={values.type && !values.type.includes('End')}
-          type="submit"
-        >
+        <Button fill iconF7="arrow_down_circle_fill" onClick={submitCheckIn('End')} type="submit">
           End
         </Button>
       </CardFooter>

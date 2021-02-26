@@ -32,7 +32,7 @@ const calendarParams = {
 import { readStudentRegister, writeStudentRegister } from '../data/sheets';
 import { logger } from '../js/utils';
 import { startLoading, endLoading } from '../js/loader';
-import MainNav from '../components/main-nav';
+import { LeftNav } from '../components/main-nav';
 
 const { log } = logger('students');
 
@@ -201,9 +201,7 @@ export default () => {
 
   return (
     <Page name="students">
-      <Navbar>
-        <MainNav title="Students" />
-      </Navbar>
+      <LeftNav title="Students" />
       <Toolbar hidden={modified} tabbar bottom>
         <Link tabLink="#Attendance">Attendance</Link>
         <Link tabLink="#Behaviour">Behaviour</Link>

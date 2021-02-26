@@ -31,16 +31,17 @@ export const writeStudentRegister = async ({ students, date, section, type, user
   await appendSheetData('STUDENT_REGISTER_DATA', values);
 };
 
-export const getActiveStudents = async () => {
-  const data = await getSheetData('STUDENT_REGISTRATIONS');
-  const headers = ['id', 'name', 'section', 'term1', 'term2', 'term3'];
-  const students = toJson([headers, ...data.slice(1)]).filter(({ active }) => active);
-  return students;
+const generateId = (name, timestamp) => {
+  const [a, b] = name.toString().toLowerCase().split('');
+  const t = new Date(timestamp).valueOf().toString(36);
+  return [a, b, t].join('');
 };
 
-export const writeTeacherCheckIn = async ({ name, date, time, section, type, username }) => {
-  const timestamp = timestampToSerial(new Date());
-  const row = [timestamp, name, date, section, type, time, username];
+export const writeTeacherCheckIn = async ({ name, date, time, section, type, username, id }) => {
+  const _timestamp = new Date();
+  const timestamp = timestampToSerial(_timestamp);
+  const uid = id || generateId(username, _timestamp);
+  const row = [timestamp, name, date, section, type, time, username, uid];
   return appendSheetData('TEACHER_ATTENDANCE_DATA', [row]);
 };
 
@@ -48,9 +49,10 @@ export const getTeachersCheckins = async () => {
   const data = await getSheetData('TEACHER_ATTENDANCE_DATA_QUERY');
   if (!data || data.length < 2) return [];
   const headers = data[0].map(toCamelCase);
-  return toJson([headers, ...data.slice(1)], {
+  const jsonArray = toJson([headers, ...data.slice(1)], {
     timestamp: (x) => serialToTimestamp(x),
     date: (x) => serialToDate(x).toISOString().slice(0, 10),
     time: (x) => serialToTimestamp(x).toLocaleTimeString(),
   });
+  return jsonArray.filter((r) => r.type !== 'Deleted');
 };

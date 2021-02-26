@@ -1,12 +1,26 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { List, ListItem, BlockTitle, Icon, Badge, Tab, useStore, f7 } from 'framework7-react';
+import {
+  List,
+  ListItem,
+  BlockTitle,
+  Icon,
+  Badge,
+  Tab,
+  useStore,
+  f7,
+  SwipeoutActions,
+  SwipeoutButton,
+  Subnavbar,
+  Searchbar,
+  Link,
+} from 'framework7-react';
 
 import CheckinForm from '../components/checkin';
 
 import { logger } from '../js/utils';
 const { log } = logger('teachers-updates');
 
-export default function TeachersUpdates({ newUpdate, checkins, onUpdate }) {
+export default function TeachersUpdates({ newUpdate, checkins, onUpdate, onDelete }) {
   const user = useStore('user');
   const userName = useMemo(() => user?.email.split('@')[0], [user]);
 
@@ -37,7 +51,7 @@ export default function TeachersUpdates({ newUpdate, checkins, onUpdate }) {
   return (
     <div>
       <BlockTitle id="top-of-the-list">Recent updates</BlockTitle>
-      <List mediaList>
+      <List mediaList className="search-list searchbar-found">
         <CheckinForm
           onUpdate={(data) => onUpdate({ ...data, username: userName })}
           checkin={checkin}
@@ -50,20 +64,37 @@ export default function TeachersUpdates({ newUpdate, checkins, onUpdate }) {
 
             return (
               <ListItem
-                link={ci.username === userName}
                 key={i}
                 badgeColor={color}
                 title={ci.name}
                 subtitle={`${ci.type === 'Start' ? 'Started' : 'Ended'} class: ${ci.section}`}
                 text={new Date(ci.timestamp).toLocaleString()}
-                onClick={ci.username === userName ? () => onEdit(ci) : null}
                 data-today={new Date(ci.date).toDateString() === new Date().toDateString()}
+                swipeout
+                onSwipeoutDeleted={() => {
+                  onDelete(ci);
+                  console.log('[teachers-update] onDelete', ci);
+                }}
               >
                 <Icon f7={icon} slot="media" size="48" color={color} />
                 <div slot="after" style={{ position: 'absolute', right: 0, top: 0 }}>
                   <Badge color={color}>{ci.time.slice(0, 5)}</Badge>
                   <div>{new Date(ci.date).toLocaleDateString()}</div>
                 </div>
+                {ci.username === userName && (
+                  <div>
+                    <SwipeoutActions left>
+                      <SwipeoutButton color="blue" close onClick={() => onEdit(ci)}>
+                        Edit
+                      </SwipeoutButton>
+                    </SwipeoutActions>
+                    <SwipeoutActions right>
+                      <SwipeoutButton delete confirmText="Are you sure?">
+                        Delete
+                      </SwipeoutButton>
+                    </SwipeoutActions>
+                  </div>
+                )}
               </ListItem>
             );
           })}
